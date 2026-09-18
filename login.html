@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>WBR Sales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+:root{color-scheme:light;--bg:#111417;--card:#ffffff;--ink:#111417;--ink-2:#4a4f55;--muted:#8a9096;--border:#d9dcdf;--brand:#dd1d1d;--brand-hover:#c21717;--bad:#c62f2f}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:24px 16px}
+.card{background:var(--card);border-radius:8px;width:100%;max-width:400px;padding:32px 28px 26px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.logo{display:block;height:64px;width:auto;margin:0 auto 18px}
+.eyebrow{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:center;margin:0}
+h1{font-size:24px;font-weight:800;margin:4px 0 20px;text-align:center;line-height:1.1}
+label{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
+.pw{display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.pw:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px rgba(221,29,29,.15)}
+input[type=password],input[type=text]{flex:1;min-width:0;border:0;padding:12px 12px;font:inherit;font-size:16px;color:var(--ink);background:#fff;outline:none}
+.eye{border:0;background:#f3f4f5;color:var(--ink-2);padding:0 12px;cursor:pointer;font:inherit;font-size:13px;font-weight:600}
+.eye:hover{background:#e9ebed}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 18px;font-size:13.5px;color:var(--ink-2)}
+.row label{display:inline-flex;align-items:center;gap:8px;font:inherit;text-transform:none;letter-spacing:0;margin:0;cursor:pointer;color:var(--ink-2)}
+.row input{accent-color:var(--brand);width:16px;height:16px;margin:0}
+button.go{width:100%;border:0;border-radius:6px;background:var(--brand);color:#fff;font:inherit;font-size:16px;font-weight:700;padding:13px;cursor:pointer}
+button.go:hover{background:var(--brand-hover)}
+button.go:disabled{opacity:.7;cursor:progress}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.err{color:var(--bad);font-weight:600;font-size:14px;margin:12px 0 0;text-align:center}
+.note{color:var(--muted);font-size:12.5px;text-align:center;margin:18px 0 0;line-height:1.4}
+.note a{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<main class="card">
+  <img class="logo" src="__LOGO__" alt="Wheels Below Retail" width="200" height="103">
+  <p class="eyebrow">Wheels Below Retail</p>
+  <h1>Sales dashboard</h1>
+  <form id="f" autocomplete="on">
+    <label for="pw">Password</label>
+    <div class="pw"><input id="pw" name="password" type="password" autocomplete="current-password" required autofocus><button class="eye" type="button" id="eye" aria-label="Show password">Show</button></div>
+    <div class="row"><label><input type="checkbox" id="remember"> Remember this device</label></div>
+    <button class="go" id="go" type="submit">Open dashboard</button>
+    <p class="err" id="err" hidden></p>
+  </form>
+  <p class="note" id="note">The dashboard is encrypted. It unlocks in your browser and nothing is sent anywhere.</p>
+</main>
+<script>
+const ENC = __ENC_JSON__;
+(function(){
+  const $=id=>document.getElementById(id);
+  const b64=s=>Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+  const salt=b64(ENC.salt), iv=b64(ENC.iv), data=b64(ENC.data);
+  const err=$('err'), go=$('go'), pw=$('pw');
+  const KEY='wbr-dash-key';
+  function fail(msg){ err.textContent=msg; err.hidden=false; go.disabled=false; go.textContent='Open dashboard'; }
+  if(!(window.crypto&&crypto.subtle)){ fail('This page must be opened over https (or localhost) to unlock.'); go.disabled=true; }
+  $('eye').addEventListener('click',()=>{ const t=pw.type==='password'; pw.type=t?'text':'password'; $('eye').textContent=t?'Hide':'Show'; pw.focus(); });
+  async function deriveKey(password){ const km=await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:ENC.iter, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, true, ['decrypt']); }
+  async function unlock(key){ const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, data); const html=new TextDecoder().decode(pt); document.open(); document.write(html); document.close(); }
+  async function tryStored(){ let raw=null; try{ raw=sessionStorage.getItem(KEY)||localStorage.getItem(KEY); }catch(e){} if(!raw) return; try{ const key=await crypto.subtle.importKey('raw', b64(raw), {name:'AES-GCM'}, true, ['decrypt']); await unlock(key); }catch(e){ try{ sessionStorage.removeItem(KEY); localStorage.removeItem(KEY); }catch(_){} } }
+  $('f').addEventListener('submit', async ev=>{ ev.preventDefault(); err.hidden=true; go.disabled=true; go.textContent='Unlocking…';
+    try{ const key=await deriveKey(pw.value); const raw=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.exportKey('raw', key))));
+      try{ sessionStorage.setItem(KEY, raw); if($('remember').checked) localStorage.setItem(KEY, raw); }catch(e){}
+      await unlock(key);
+    }catch(e){ try{ sessionStorage.removeItem(KEY); }catch(_){} fail('That password did not work. Check it and try again.'); pw.select(); }
+  });
+  if(window.crypto&&crypto.subtle) tryStored();
+})();
+</script>
+</body>
+</html>

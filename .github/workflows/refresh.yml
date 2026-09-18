@@ -13,10 +13,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Rebuild index.html from the sheet
+      - run: pip install cryptography
+      - name: Rebuild the encrypted index.html from the sheet
         env:
-          SHEET_ID: ${{ vars.SHEET_ID || '1PEBhIjJ8oHqoUIwvSUZCgWIy4DzNANRt' }}
-          SHEET_GID: ${{ vars.SHEET_GID || '874835443' }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          SHEET_GID: ${{ secrets.SHEET_GID }}
+          DASH_PASSWORD: ${{ secrets.DASH_PASSWORD }}
         run: python3 build.py
       - name: Commit if changed
         run: |

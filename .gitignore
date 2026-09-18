@@ -1,4 +1,5 @@
 .env
 sheet.xlsx
 sheet.csv
+app.html
 __pycache__/
