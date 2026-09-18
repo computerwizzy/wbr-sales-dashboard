@@ -1,3 +1,4 @@
 .env
 sheet.xlsx
+sheet.csv
 __pycache__/

@@ -58,6 +58,10 @@ button{font:inherit;color:inherit}
 .hdr h1{font-size:30px;line-height:1.05;font-weight:700;letter-spacing:.01em}
 .hdr h1 small{display:block;font-family:"Barlow",sans-serif;font-size:13px;font-weight:500;color:var(--ink-2);letter-spacing:0;margin-top:6px}
 .hdr .meta{font-size:12.5px;color:var(--ink-2);text-align:right;line-height:1.5}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink-2)}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.badge.live i{background:var(--good)}
+.warn{color:var(--bad)}
 .hdr .meta code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);border:1px solid var(--border);padding:1px 5px;border-radius:3px}
 
 /* filters */
@@ -199,18 +203,40 @@ tr:hover td{background:var(--surface-2)}
 <script>
 (function(){
 'use strict';
-/* ---------- data ---------- */
-const R = RAW.map(a => ({
-  d:a[0], y:+a[0].slice(0,4), m:+a[0].slice(5,7), ym:a[0].slice(0,7),
-  inv:a[1], ch:a[2], ful:a[3], st:a[4], sc:a[5], grp:a[6], type:a[7], prod:a[8],
-  qty:a[9], sales:a[10], cost:a[11], ship:a[12], fee:a[13], profit:a[14], seller:a[15], rcost:a[16], pay:a[17]
-}));
+/* ---------- CSV + cleaning: the single copy of the business rules ---------- */
+/*CLEAN-START*/
+const MON={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12,ENE:1,ABR:4,AGO:8,SET:9,DIC:12};
+function parseCSV(text){ const rows=[]; let row=[], field='', q=false; const n=text.length; for(let i=0;i<n;i++){ const c=text[i]; if(q){ if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i++; } else q=false; } else field+=c; continue; } if(c==='"'){ q=true; continue; } if(c===','){ row.push(field); field=''; continue; } if(c==='\r') continue; if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; continue; } field+=c; } if(field!==''||row.length){ row.push(field); rows.push(row); } return rows; }
+const txt=v=>(v==null?'':String(v)).trim();
+function num(v){ let s=txt(v); if(!s) return 0; let neg=false; if(/^\(.*\)$/.test(s)){ neg=true; s=s.slice(1,-1); } s=s.replace(/[$,\s]/g,''); if(s.startsWith('-')){ neg=!neg; s=s.slice(1); } const x=parseFloat(s); return isFinite(x)?(neg?-x:x):0; }
+const titleCase=s=>s.toLowerCase().replace(/(^|[^a-z0-9])([a-z])/g,(m,p,c)=>p+c.toUpperCase());
+function typeGroup(t){ t=t.toUpperCase(); if(t.startsWith('NEW WHEEL')) return 'Wheels'; if(t.startsWith('NEW TIRE')) return 'New tires'; if(t.startsWith('USED TIRE')) return 'Used tires'; if(t.startsWith('PACKAGE')) return 'Packages'; if(t.startsWith('ACCESSOR')) return 'Accessories'; if(t.startsWith('LABOR')||t.startsWith('CUSTOM PAINT')) return 'Labor'; return 'Other'; }
+function channelName(c){ const u=c.toUpperCase(); if(u.includes('SHOPIFY')) return 'Shopify'; if(u.includes('EBAY')) return 'eBay'; if(u.includes('AMAZON')) return 'Amazon'; return u?titleCase(u):'Unknown'; }
+function statusClass(s){ s=s.toUpperCase(); if(s.startsWith('CANCEL')) return 'canceled'; if(s.startsWith('TEST')) return 'test'; if(s.startsWith('FRAUD')||s.startsWith('CHARGEBACK')||s.startsWith('LOST')) return 'loss'; if(s.startsWith('RMA')) return 'rma'; if(s.startsWith('RETURN')||s.startsWith('REFUND')||s.startsWith('PARTIALLY REFUNDED')||s.includes('RETURN')) return 'return'; return 'ok'; }
+function sellerName(s){ s=s.toUpperCase().replace(/\s+/g,''); if(!s||s.startsWith('GASTADO')) return ''; s=s.replace(/JAMIE/g,'JAIME'); return s.split('/').filter(Boolean).map(titleCase).sort().join('/'); }
+function resolveDay(s, mon){ const m=/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{2,4})/.exec(txt(s)); if(!m) return [1,'missing']; const a=+m[1], b=+m[2]; if(a===mon&&b>=1&&b<=31) return [b,'ok']; if(b===mon&&a>=1&&a<=31) return [a,'swapped']; return [(b>=1&&b<=31)?Math.min(b,28):1,'mismatch']; }
+function cleanCSV(text){
+  const rows=parseCSV(text); if(!rows.length) throw new Error('empty file');
+  const hdr=rows[0].map(h=>txt(h).toUpperCase()); const col=n=>hdr.indexOf(n);
+  const I={date:col('DATE'),month:col('MONTH'),year:col('YEAR'),inv:col('INVOICE'),ch:col('CANAL DE VENTA'),ful:col('FULFILLMENT'),st:col('STATUS'),type:col('TYPE'),prod:col('PRODUCT'),qty:col('QTY'),sales:col('VENTA'),cost:col('COSTO'),ship:col('SHIPPING'),fee:col('FEE'),profit:col('PROFIT'),seller:col('SELLER'),rcost:col('RETURN COST'),pay:col('PAYMENT TYPE')};
+  if(I.date<0||I.year<0||I.month<0||I.sales<0||I.profit<0) throw new Error('the sheet columns changed (DATE, MONTH, YEAR, VENTA, PROFIT are required)');
+  const diag={}; const bump=k=>{ diag[k]=(diag[k]||0)+1; }; const out=[];
+  for(let i=1;i<rows.length;i++){ const r=rows[i]; if(!r.some(c=>txt(c)!=='')) continue; const g=k=>I[k]>=0?r[I[k]]:'';
+    const year=parseInt(txt(g('year')),10); if(!isFinite(year)){ bump('skip: no YEAR (summary rows)'); continue; }
+    const mon=MON[txt(g('month')).toUpperCase().slice(0,3)]; if(!mon){ bump(num(g('sales'))!==0?'skip: no MONTH but has VENTA':'skip: no MONTH (empty pre-filled rows)'); continue; }
+    let [day,how]=resolveDay(g('date'),mon); let dt=new Date(Date.UTC(year,mon-1,day)); if(dt.getUTCMonth()!==mon-1){ dt=new Date(Date.UTC(year,mon-1,1)); how='clamped'; } bump('date '+how); const iso=dt.toISOString().slice(0,10);
+    const ch=txt(g('ch')), st=txt(g('st')), ty=txt(g('type')), fu=txt(g('ful')); if([ch,st,ty,fu].some(x=>x.toUpperCase()==='TEST')){ bump('skip: TEST rows'); continue; }
+    let sc=statusClass(st); if(sc==='ok'&&(ty.toUpperCase()==='CANCELED'||fu.toUpperCase()==='CANCELED')) sc='canceled';
+    out.push({d:iso,y:year,m:mon,ym:iso.slice(0,7),inv:txt(g('inv')),ch:channelName(ch),ful:fu?titleCase(fu):'—',st:st.toUpperCase()||'—',sc,grp:typeGroup(ty),type:ty.toUpperCase()||'—',prod:txt(g('prod')).replace(/\s+/g,' ').slice(0,110),qty:num(g('qty')),sales:num(g('sales')),cost:num(g('cost')),ship:num(g('ship')),fee:num(g('fee')),profit:num(g('profit')),seller:sellerName(txt(g('seller'))),rcost:num(g('rcost')),pay:txt(g('pay')).toUpperCase()}); }
+  out.sort((a,b)=> a.d<b.d?-1:a.d>b.d?1:(a.inv<b.inv?-1:a.inv>b.inv?1:0));
+  return {rows:out, diag};
+}
+/*CLEAN-END*/
+
+/* ---------- data (filled by setData) ---------- */
+let R=[], DIAG={}, maxDate='', minDate='', curYear=0, years=[], PERIODS=[], SOURCE={live:false,at:null,error:null,loading:false};
 const isSale = r => r.sc==='ok' || r.sc==='rma' || r.sc==='return';
 const UNIT_GROUPS = new Set(['Wheels','New tires','Used tires','Packages']);
-const maxDate = R.reduce((m,r)=> r.d>m?r.d:m, '0000');
-const minDate = R.reduce((m,r)=> r.d<m?r.d:m, '9999');
-const curYear = +maxDate.slice(0,4);
-const years = [...new Set(R.map(r=>r.y))].sort();
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const CH_SLOT = {Shopify:1, eBay:2, Amazon:3};
 const GROUP_ORDER = ['Wheels','New tires','Used tires','Packages','Accessories','Labor','Other'];
@@ -219,22 +245,28 @@ const GROUP_ORDER = ['Wheels','New tires','Used tires','Packages','Accessories',
 function addMonths(iso, n){ const y=+iso.slice(0,4), m=+iso.slice(5,7)-1+n, d=+iso.slice(8,10); const dt=new Date(Date.UTC(y+Math.floor(m/12), ((m%12)+12)%12, 1)); const last=new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth()+1, 0)).getUTCDate(); dt.setUTCDate(Math.min(d,last)); return dt.toISOString().slice(0,10); }
 function addDays(iso, n){ const dt=new Date(iso+'T00:00:00Z'); dt.setUTCDate(dt.getUTCDate()+n); return dt.toISOString().slice(0,10); }
 function fmtDate(iso){ const [y,m,d]=iso.split('-'); return `${MONTHS[+m-1]} ${+d}, ${y}`; }
-const PERIODS = [];
-PERIODS.push({id:'all', label:'All time', range:[minDate,maxDate], cmp:null, name:`${fmtDate(minDate)} – ${fmtDate(maxDate)}`});
-for (const y of [...years].reverse()){
-  if (y===curYear){
-    const cmpEnd = `${y-1}${maxDate.slice(4)}`;
-    PERIODS.push({id:String(y), label:`${y} YTD`, range:[`${y}-01-01`, maxDate], cmp: years.includes(y-1)?[`${y-1}-01-01`, cmpEnd]:null, cmpLabel:`vs ${y-1} YTD`, name:`Jan 1 – ${fmtDate(maxDate)}`});
-  } else {
-    PERIODS.push({id:String(y), label:String(y), range:[`${y}-01-01`,`${y}-12-31`], cmp: years.includes(y-1)?[`${y-1}-01-01`,`${y-1}-12-31`]:null, cmpLabel:`vs ${y-1}`, name:`Full year ${y}`});
+function buildPeriods(){
+  const P=[];
+  P.push({id:'all', label:'All time', range:[minDate,maxDate], cmp:null, name:`${fmtDate(minDate)} – ${fmtDate(maxDate)}`});
+  for (const y of [...years].reverse()){
+    if (y===curYear){ const cmpEnd=`${y-1}${maxDate.slice(4)}`; P.push({id:String(y), label:`${y} YTD`, range:[`${y}-01-01`, maxDate], cmp: years.includes(y-1)?[`${y-1}-01-01`, cmpEnd]:null, cmpLabel:`vs ${y-1} YTD`, name:`Jan 1 – ${fmtDate(maxDate)}`}); }
+    else { P.push({id:String(y), label:String(y), range:[`${y}-01-01`,`${y}-12-31`], cmp: years.includes(y-1)?[`${y-1}-01-01`,`${y-1}-12-31`]:null, cmpLabel:`vs ${y-1}`, name:`Full year ${y}`}); }
   }
+  const l12start=addDays(addMonths(maxDate,-12),1);
+  P.push({id:'l12', label:'Last 12 months', range:[l12start,maxDate], cmp:[addMonths(l12start,-12), addDays(l12start,-1)], cmpLabel:'vs prior 12 months', name:`${fmtDate(l12start)} – ${fmtDate(maxDate)}`});
+  return P;
 }
-const l12start = addDays(addMonths(maxDate,-12),1);
-PERIODS.push({id:'l12', label:'Last 12 months', range:[l12start,maxDate], cmp:[addDays(addMonths(l12start,-12),0), addDays(l12start,-1)], cmpLabel:'vs prior 12 months', name:`${fmtDate(l12start)} – ${fmtDate(maxDate)}`});
+function setData(rows, diag, src){
+  R=rows; DIAG=diag; SOURCE=src;
+  maxDate=R.reduce((m,r)=>r.d>m?r.d:m,'0000'); minDate=R.reduce((m,r)=>r.d<m?r.d:m,'9999'); curYear=+maxDate.slice(0,4);
+  years=[...new Set(R.map(r=>r.y))].sort(); PERIODS=buildPeriods();
+  if(!PERIODS.some(p=>p.id===f.period)) f.period=String(curYear);
+  renderFilters(); renderAll();
+}
 
 /* ---------- state ---------- */
-const f = {period:String(curYear), channel:'all', group:'all', seller:'all'};
-try{ const s=JSON.parse(localStorage.getItem('wbr-filters')||'{}'); if (PERIODS.some(p=>p.id===s.period)) Object.assign(f,s); }catch(e){}
+const f = {period:null, channel:'all', group:'all', seller:'all'};
+try{ Object.assign(f, JSON.parse(localStorage.getItem('wbr-filters')||'{}')); }catch(e){}
 function saveState(){ try{ localStorage.setItem('wbr-filters', JSON.stringify(f)); }catch(e){} }
 const period = () => PERIODS.find(p=>p.id===f.period);
 const dimOK = r => (f.channel==='all'||r.ch===f.channel) && (f.group==='all'||r.grp===f.group) && (f.seller==='all'||r.seller===f.seller);
@@ -406,7 +438,7 @@ function renderAll(){
   document.querySelectorAll('#periodChips .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===P.label)));
   const dimTxt=[f.channel!=='all'?f.channel:null, f.group!=='all'?f.group:null, f.seller!=='all'?f.seller:null].filter(Boolean).join(' · ');
   $('subtitle').textContent = `${P.name}${dimTxt?' · '+dimTxt:''}`;
-  $('hdrmeta').replaceChildren(); const m1=H('div'); m1.append(document.createTextNode('Data through '), H('b',null,fmtDate(maxDate)), document.createTextNode(' · rebuilt '+META.generated)); const m2=H('div'); const a=H('a',null,'Open the Google Sheet'); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener'; m2.append(a, document.createTextNode(' · refresh with '), Object.assign(H('code',null,'python3 build.py'))); $('hdrmeta').append(m1,m2);
+  renderStatus();
 
   /* KPIs */
   const k=$('kpis'); k.replaceChildren();
@@ -456,6 +488,33 @@ function renderAll(){
   renderNotes();
 }
 
+
+/* ---------- live data ---------- */
+const LIVE_URL=`https://docs.google.com/spreadsheets/d/${META.sheetId}/export?format=csv&gid=${META.gid}`;
+const timeStr=d=>d? d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+function renderStatus(){
+  const m=$('hdrmeta'); m.replaceChildren();
+  const m1=H('div'); m1.append(document.createTextNode('Data through '), H('b',null,fmtDate(maxDate)), document.createTextNode(' · '));
+  const badge=H('span','badge '+(SOURCE.live?'live':'snap')); badge.append(document.createElement('i'));
+  badge.append(document.createTextNode(SOURCE.loading? 'Reading the sheet…' : SOURCE.live? `Live · read ${timeStr(SOURCE.at)}` : `Snapshot from ${META.generated}`)); m1.append(badge);
+  const rb=H('button','reset', SOURCE.loading?'…':'Refresh'); rb.type='button'; rb.disabled=!!SOURCE.loading; rb.onclick=()=>refreshLive(true); m1.append(rb);
+  const m2=H('div'); if(SOURCE.error && !SOURCE.live) m2.append(H('span','warn',`Live read failed: ${SOURCE.error}. `));
+  const a=H('a',null,'Open the Google Sheet'); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener'; m2.append(a); m.append(m1,m2);
+}
+let refreshing=false, lastLive=0;
+async function refreshLive(){
+  if(refreshing) return; refreshing=true; SOURCE={...SOURCE, loading:true}; renderStatus();
+  try{ const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(), 25000);
+    const res=await fetch(LIVE_URL,{cache:'no-store', signal:ctrl.signal}); clearTimeout(t);
+    if(!res.ok) throw new Error('Google answered HTTP '+res.status);
+    const text=await res.text(); const {rows,diag}=cleanCSV(text); if(rows.length<10) throw new Error('the sheet came back nearly empty');
+    lastLive=Date.now(); setData(rows, diag, {live:true, at:new Date(), error:null, loading:false});
+  }catch(e){ const msg = e.name==='AbortError' ? 'timed out' : (e instanceof TypeError ? 'the browser blocked the request (offline, a strict sandbox, or the sheet is no longer shared)' : e.message); SOURCE={...SOURCE, loading:false, error:msg}; renderStatus(); }
+  finally{ refreshing=false; }
+}
+setInterval(()=>refreshLive(), 10*60*1000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && Date.now()-lastLive>2*60*1000) refreshLive(); });
+
 let tableQ=''; let tableShown=40;
 function renderTable(cur){
   const el=cards.table; el.replaceChildren();
@@ -474,15 +533,16 @@ function renderTable(cur){
 function renderNotes(){
   const n=$('notes'); n.replaceChildren();
   const sec=(title, items)=>{ const d=H('div'); d.append(H('h3',null,title)); const ul=H('ul'); for(const it of items){ const li=H('li'); if (typeof it==='string') li.textContent=it; else li.append(...it); ul.append(li);} d.append(ul); return d; };
-  const ex=META.excluded||{}, dt=META.dates||{};
+  const ex=DIAG, dt=DIAG;
   const a=H('a',null,'the Google Sheet'); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener';
-  n.append(sec('Where the numbers come from',[ [document.createTextNode('Tab “'+META.tab+'” of '), a, document.createTextNode(`, ${int(META.rows)} invoice lines from ${fmtDate(minDate)} to ${fmtDate(maxDate)}.`)], 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.', 'Orders count distinct invoice numbers. “Wheels & tires sold” sums QTY on wheel, tire and package lines only.', 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.' ]));
-  n.append(sec('What was left out or repaired',[ `Canceled orders are excluded from sales and shown only in the cancellations panel. Rows marked TEST were dropped (${int(ex['skip: TEST rows']||0)} lines).`, 'RMA and returned or refunded orders stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.', `Month and year come from the MONTH and YEAR columns. ${int(dt['date swapped']||0)} DATE cells had day and month swapped and were repaired; ${int((dt['date mismatch']||0)+(dt['date missing']||0))} unreadable dates were placed within their month.`, `${int(ex['skip: no MONTH (empty pre-filled rows)']||0)} empty pre-filled rows and ${int(ex['skip: no YEAR (summary rows)']||0)} summary rows at the bottom of the tab were skipped.` ]));
-  n.append(sec('Keeping it current',[ 'This page holds a snapshot of the sheet taken when it was last rebuilt. Run “python3 build.py” in the project folder to download the latest sheet and regenerate the page, then republish it.', 'Filters are remembered in this browser only. Every chart has a Table view with the same numbers.' ]));
+  n.append(sec('Where the numbers come from',[ [document.createTextNode('Tab “'+META.tab+'” of '), a, document.createTextNode(`, ${int(R.length)} invoice lines from ${fmtDate(minDate)} to ${fmtDate(maxDate)}${SOURCE.live?', read live from the sheet':', from the snapshot embedded in this page'}.`)], 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.', 'Orders count distinct invoice numbers. “Wheels & tires sold” sums QTY on wheel, tire and package lines only.', 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.' ]));
+  n.append(sec('What was left out or repaired',[ `Canceled orders are excluded from sales and shown only in the cancellations panel. Rows marked TEST were dropped (${int(ex['skip: TEST rows']||0)} lines).`, 'RMA and returned or refunded orders stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.', `Month and year come from the MONTH and YEAR columns. ${int(dt['date swapped']||0)} DATE cells had day and month swapped and were repaired; ${int((dt['date mismatch']||0)+(dt['date missing']||0)+(dt['date clamped']||0))} unreadable dates were placed within their month.`, `${int(ex['skip: no MONTH (empty pre-filled rows)']||0)} empty pre-filled rows and ${int(ex['skip: no YEAR (summary rows)']||0)} summary rows at the bottom of the tab were skipped.` ]));
+  n.append(sec('Keeping it current',[ 'The page reads the sheet directly every time it opens, every 10 minutes while it stays open, and when you press Refresh. New rows in the sheet show up on the next read.', 'If the sheet cannot be reached, the page falls back to the snapshot embedded when it was last built (python3 build.py in the project folder).', 'Filters are remembered in this browser only. Every chart has a Table view with the same numbers.' ]));
 }
 
 /* ---------- boot ---------- */
-renderFilters(); renderAll();
+{ const {rows,diag}=cleanCSV(SNAPSHOT_CSV); setData(rows, diag, {live:false, at:null, error:null, loading:false}); }
+refreshLive();
 let raf=0; const ro=new ResizeObserver(()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ const w=vizWidth(cards.trend); if (Math.abs(w-W)>4) renderAll(); }); }); ro.observe(cards.trend);
 document.addEventListener('scroll',hideTip,{passive:true});
 })();
