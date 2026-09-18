@@ -45,7 +45,7 @@
   --shadow:none;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.45 "Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1360px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:18px 48px}
 h1,h2,h3{font-family:"Assistant",system-ui,sans-serif;text-wrap:balance;margin:0}
 a{color:var(--link)}
@@ -58,36 +58,37 @@ button{font:inherit;color:inherit}
 .hdr{max-width:1360px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:16px 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px}
 .brand{display:flex;align-items:center;gap:16px;min-width:0}
 .logo{height:52px;width:auto;display:block;flex:none;background:#fff;padding:4px 8px;border-radius:4px;box-sizing:content-box}
-.hdr h1{font-size:24px;line-height:1.05;font-weight:800;letter-spacing:.005em}
-.hdr h1 small{display:block;font-family:"Assistant",sans-serif;font-size:13px;font-weight:400;color:var(--ink-2);letter-spacing:0;margin-top:4px}
-.hdr .meta{font-size:12.5px;color:var(--ink-2);text-align:right;line-height:1.5}
+.hdr h1{font-size:27px;line-height:1.05;font-weight:800;letter-spacing:.005em}
+.hdr h1 small{display:block;font-family:"Assistant",sans-serif;font-size:14.5px;font-weight:400;color:var(--ink-2);letter-spacing:0;margin-top:4px}
+.hdr .meta{font-size:13.5px;color:var(--ink-2);text-align:right;line-height:1.5}
 .badge{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink-2)}
 .badge i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
 .badge.live i{background:var(--good)}
 .warn{color:var(--bad)}
-.hdr .meta code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);border:1px solid var(--border);padding:1px 5px;border-radius:3px}
+.hdr .meta code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);border:1px solid var(--border);padding:1px 5px;border-radius:3px}
 
 /* filters */
 .filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:10px}
 .filters.last{margin-bottom:18px}
 .sel input[type=date]{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:5px 8px;color-scheme:inherit}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--chip-on-bg);background:var(--surface);color:var(--ink);border-radius:4px;padding:6px 13px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.2}
+.chip{border:1px solid var(--chip-on-bg);background:var(--surface);color:var(--ink);border-radius:4px;padding:7px 14px;font-size:14.5px;font-weight:700;cursor:pointer;line-height:1.2}
 .chip:hover{background:var(--surface-2)}
 .chip[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
 .chip:hover{border-color:var(--brand-deep)}
-.sel{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
+.sel{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;color:var(--ink-2)}
 .sel select{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:6px 8px;min-width:110px;max-width:220px}
 .spacer{flex:1}
-.reset{background:none;border:0;color:var(--link);cursor:pointer;font-size:13px;padding:4px 6px}
+.reset{background:none;border:0;color:var(--link);cursor:pointer;font-size:14.5px;padding:4px 6px}
 
 /* kpis */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:14px}
+@media (min-width:1000px){ .kpis{grid-template-columns:repeat(4,1fr)} }
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 14px 10px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;gap:2px 8px;min-height:104px}
-.kpi .lbl{grid-column:1/3;font-size:12px;color:var(--ink-2);font-weight:500}
-.kpi .val{font-family:"Assistant",sans-serif;font-size:30px;font-weight:700;line-height:1.05;letter-spacing:-.005em;align-self:end}
+.kpi .lbl{grid-column:1/3;font-size:14px;color:var(--ink-2);font-weight:500}
+.kpi .val{font-family:"Assistant",sans-serif;font-size:34px;font-weight:700;line-height:1.05;letter-spacing:-.005em;align-self:end}
 .kpi .spark{grid-row:2;align-self:end;width:84px;height:30px}
-.kpi .dlt{grid-column:1/3;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;line-height:1.3}
+.kpi .dlt{grid-column:1/3;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;line-height:1.3}
 .kpi .dlt b{font-weight:600;color:var(--ink-2)}
 .kpi .dlt b.up{color:var(--good)}
 .kpi .dlt b.down{color:var(--bad)}
@@ -98,39 +99,39 @@ button{font:inherit;color:inherit}
 .g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:4px;box-shadow:var(--shadow);padding:14px 16px 12px;min-width:0;display:flex;flex-direction:column}
 .card-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
-.card-h h2{font-size:16.5px;font-weight:600;line-height:1.2}
-.card-h .sub{font-size:12px;color:var(--muted);margin-top:2px}
-.tbtn{border:1px solid var(--border-strong);background:transparent;border-radius:4px;font-size:11.5px;padding:3px 8px;cursor:pointer;color:var(--ink-2);white-space:nowrap;flex:none}
+.card-h h2{font-size:19px;font-weight:700;line-height:1.2}
+.card-h .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.tbtn{border:1px solid var(--border-strong);background:transparent;border-radius:4px;font-size:13px;padding:4px 10px;cursor:pointer;color:var(--ink-2);white-space:nowrap;flex:none}
 .tbtn:hover{background:var(--surface-2)}
 .tbtn[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
 .viz{position:relative;min-width:0}
 .viz svg{display:block;width:100%;height:auto;overflow:visible}
 svg text{font-family:inherit}
-.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink-2);margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px;color:var(--ink-2);margin-top:6px}
 .legend .k{display:inline-flex;align-items:center;gap:6px}
 .legend .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
 .legend .ln{width:16px;height:0;border-top:2.5px solid;display:inline-block;border-radius:2px}
-.empty{color:var(--muted);font-size:13px;padding:40px 0;text-align:center}
+.empty{color:var(--muted);font-size:14.5px;padding:40px 0;text-align:center}
 .side{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
 .side div{background:var(--surface-2);border-radius:4px;padding:8px 10px}
-.side .k{font-size:11.5px;color:var(--ink-2)}
-.side .v{font-family:"Assistant",sans-serif;font-size:20px;font-weight:700;line-height:1.1}
-.side .s{font-size:11.5px;color:var(--muted)}
+.side .k{font-size:13px;color:var(--ink-2)}
+.side .v{font-family:"Assistant",sans-serif;font-size:23px;font-weight:700;line-height:1.1}
+.side .s{font-size:13px;color:var(--muted)}
 
 /* chart marks */
 .c1{fill:var(--s1)} .c2{fill:var(--s2)} .c3{fill:var(--s3)} .c4{fill:var(--s4)} .c5{fill:var(--s5)} .c6{fill:var(--s6)} .c7{fill:var(--s7)} .c8{fill:var(--s8)} .cde{fill:var(--de)}
 .o1{fill:var(--o1)} .o2{fill:var(--o2)} .o3{fill:var(--o3)}
 .l1{stroke:var(--s1)} .l2{stroke:var(--s2)} .lde{stroke:var(--de-line)}
 .gl{stroke:var(--grid);stroke-width:1} .base{stroke:var(--axis);stroke-width:1}
-.ax{fill:var(--muted);font-size:11px} .dl{fill:var(--ink-2);font-size:11px;font-weight:500}
-.lbl{fill:var(--ink);font-size:12px}
+.ax{fill:var(--muted);font-size:12.5px} .dl{fill:var(--ink-2);font-size:12.5px;font-weight:600}
+.lbl{fill:var(--ink);font-size:13.5px}
 .hit{fill:transparent;cursor:crosshair}
 .bar.hover, .seg.hover{filter:brightness(1.12)}
 .xh{stroke:var(--axis);stroke-width:1}
 .ring{stroke:var(--surface);stroke-width:2}
 
 /* tooltip */
-#tip{position:absolute;z-index:20;pointer-events:none;background:var(--surface);border:1px solid var(--border-strong);border-radius:6px;padding:8px 10px;font-size:12.5px;box-shadow:0 6px 20px rgba(0,0,0,.14);min-width:150px;max-width:300px}
+#tip{position:absolute;z-index:20;pointer-events:none;background:var(--surface);border:1px solid var(--border-strong);border-radius:6px;padding:9px 11px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.14);min-width:150px;max-width:300px}
 #tip .t{font-weight:600;margin-bottom:4px;color:var(--ink)}
 #tip .r{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:1px 0}
 #tip .r .n{color:var(--ink-2);display:inline-flex;align-items:center;gap:6px;min-width:0}
@@ -139,14 +140,14 @@ svg text{font-family:inherit}
 
 /* tables */
 .tv{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:12.5px}
+table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid);vertical-align:top}
-th{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap;position:sticky;top:0;background:var(--surface)}
+th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap;position:sticky;top:0;background:var(--surface)}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.neg{color:var(--bad)}
 td.dt{white-space:nowrap}
 tr:hover td{background:var(--surface-2)}
-.pill{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.03em;padding:1px 6px;border-radius:3px;border:1px solid var(--border-strong);color:var(--ink-2);white-space:nowrap}
+.pill{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.03em;padding:1px 6px;border-radius:3px;border:1px solid var(--border-strong);color:var(--ink-2);white-space:nowrap}
 .pill.rma{border-color:var(--brand-deep);color:var(--brand-deep)}
 .pill.ret{border-color:var(--ink);color:var(--ink)}
 .pill.can{border-color:var(--muted)}
@@ -158,12 +159,12 @@ tr:hover td{background:var(--surface-2)}
 .more button:hover{background:var(--brand-deep)}
 
 /* footer */
-.notes{font-size:12.5px;color:var(--ink-2);margin-top:18px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
-.notes h3{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.notes{font-size:14px;color:var(--ink-2);margin-top:18px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.notes h3{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px}
 .notes ul{margin:0;padding-left:16px}
 .notes li{margin:2px 0}
 @media (prefers-reduced-motion:no-preference){ .bar,.seg{transition:filter .12s} }
-@media (max-width:560px){ .hdr .meta{text-align:left} .kpi .val{font-size:26px} .side{grid-template-columns:1fr 1fr} .logo{height:40px} .hdr h1{font-size:20px} }
+@media (max-width:560px){ .hdr .meta{text-align:left} .kpi .val{font-size:30px} .side{grid-template-columns:1fr 1fr} .logo{height:40px} .hdr h1{font-size:22px} }
 </style>
 
 <div class="band"><header class="hdr">
@@ -176,6 +177,7 @@ tr:hover td{background:var(--surface-2)}
     <div class="chips" id="periodChips"></div>
     <label class="sel">From <input type="date" id="fFrom"></label>
     <label class="sel">To <input type="date" id="fTo"></label>
+    <label class="sel">Month <select id="fMonth"></select></label>
   </div>
   <div class="filters last" role="group" aria-label="Filters">
     <label class="sel">Channel <select id="fChannel"></select></label>
@@ -198,6 +200,7 @@ tr:hover td{background:var(--surface-2)}
   <section class="grid g3">
     <div class="card" id="cardChannel"></div>
     <div class="card" id="cardGroup"></div>
+    <div class="card" id="cardUnits"></div>
     <div class="card" id="cardSeller"></div>
   </section>
   <section class="grid g2">
@@ -253,7 +256,9 @@ function cleanCSV(text){
 let R=[], DIAG={}, maxDate='', minDate='', curYear=0, years=[], PERIODS=[], SOURCE={live:false,at:null,error:null,loading:false};
 const isSale = r => r.sc==='ok' || r.sc==='rma' || r.sc==='return';
 const UNIT_GROUPS = new Set(['Wheels','New tires','Used tires','Packages']);
+const PRODUCT_GROUPS = new Set(['Wheels','New tires','Used tires','Packages','Accessories']);
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CH_SLOT = {Shopify:1, eBay:2, Amazon:3};
 const GROUP_ORDER = ['Wheels','New tires','Used tires','Packages','Accessories','Labor','Other'];
 
@@ -281,13 +286,16 @@ function setData(rows, diag, src){
 }
 
 /* ---------- state ---------- */
-const f = {period:null, channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''};
+const f = {period:null, month:0, channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''};
 const STATUS_LABEL={ok:'Clean sales only', rma:'RMA only', return:'Returns & refunds only'};
 try{ Object.assign(f, JSON.parse(localStorage.getItem('wbr-filters')||'{}')); }catch(e){}
 function saveState(){ try{ localStorage.setItem('wbr-filters', JSON.stringify(f)); }catch(e){} }
 function customPeriod(){ const a=f.from<=f.to?f.from:f.to, b=f.from<=f.to?f.to:f.from; const y=iso=>String(+iso.slice(0,4)-1)+iso.slice(4); return {id:'custom', label:'Custom dates', range:[a,b], cmp:[y(a),y(b)], cmpLabel:'vs same dates a year earlier', name:`${fmtDate(a)} – ${fmtDate(b)}`}; }
-const period = () => (f.period==='custom' && f.from && f.to) ? customPeriod() : PERIODS.find(p=>p.id===f.period);
-function dimOK(r, ignoreStatus){ return (f.channel==='all'||r.ch===f.channel) && (f.group==='all'||r.grp===f.group) && (f.type==='all'||r.type===f.type) && (f.seller==='all'||r.seller===f.seller) && (f.supplier==='all'||r.ful===f.supplier) && (f.pay==='all'||r.payg===f.pay) && (ignoreStatus || f.status==='all' || r.sc===f.status); }
+function period(){ const base=(f.period==='custom' && f.from && f.to) ? customPeriod() : PERIODS.find(p=>p.id===f.period); if(!f.month) return base; const P={...base}; const mn=MONTHS_FULL[f.month-1];
+  if(/^\d{4}$/.test(base.id)){ const Y=+base.id; P.name=`${mn} ${Y}`; if(base.cmp) P.cmpLabel=`vs ${mn} ${Y-1}`; }
+  else if(base.id==='all') P.name=`${mn}, every year`; else P.name=`${mn} within ${base.name}`;
+  return P; }
+function dimOK(r, ignoreStatus, ignoreMonth){ return (ignoreMonth || !f.month || r.m===f.month) && (f.channel==='all'||r.ch===f.channel) && (f.group==='all'||r.grp===f.group) && (f.type==='all'||r.type===f.type) && (f.seller==='all'||r.seller===f.seller) && (f.supplier==='all'||r.ful===f.supplier) && (f.pay==='all'||r.payg===f.pay) && (ignoreStatus || f.status==='all' || r.sc===f.status); }
 const inRange = (r,rg) => !rg || (r.d>=rg[0] && r.d<=rg[1]);
 
 /* ---------- formatting ---------- */
@@ -315,9 +323,9 @@ function moveTip(evt){ const pad=14, w=tip.offsetWidth, h=tip.offsetHeight; let 
 function hideTip(){ tip.hidden=true; }
 
 /* ---------- aggregation ---------- */
-function agg(rows){ const a={sales:0,profit:0,cost:0,units:0,lines:0,orders:new Set()}; for(const r of rows){ a.sales+=r.sales; a.profit+=r.profit; a.cost+=r.cost; a.lines++; if (UNIT_GROUPS.has(r.grp)) a.units+=r.qty; if (r.inv) a.orders.add(r.inv);} a.n=a.orders.size; a.margin=a.sales? a.profit/a.sales : NaN; a.aov=a.n? a.sales/a.n : NaN; return a; }
+function agg(rows){ const a={sales:0,profit:0,cost:0,units:0,items:0,lines:0,orders:new Set()}; for(const r of rows){ a.sales+=r.sales; a.profit+=r.profit; a.cost+=r.cost; a.lines++; if (UNIT_GROUPS.has(r.grp)) a.units+=r.qty; if (PRODUCT_GROUPS.has(r.grp)) a.items+=r.qty; if (r.inv) a.orders.add(r.inv);} a.n=a.orders.size; a.margin=a.sales? a.profit/a.sales : NaN; a.aov=a.n? a.sales/a.n : NaN; return a; }
 function monthsBetween(a,b){ const out=[]; let ym=a.slice(0,7); const end=b.slice(0,7); while(ym<=end){ out.push(ym); ym=addMonths(ym+'-01',1).slice(0,7);} return out; }
-function byMonth(rows, months){ const m=new Map(months.map(k=>[k,{sales:0,profit:0,orders:new Set(),lines:0}])); for(const r of rows){ const o=m.get(r.ym); if(!o) continue; o.sales+=r.sales; o.profit+=r.profit; o.lines++; if(r.inv) o.orders.add(r.inv);} return months.map(k=>({ym:k, ...m.get(k), n:m.get(k).orders.size})); }
+function byMonth(rows, months){ const m=new Map(months.map(k=>[k,{sales:0,profit:0,orders:new Set(),lines:0,items:0}])); for(const r of rows){ const o=m.get(r.ym); if(!o) continue; o.sales+=r.sales; o.profit+=r.profit; o.lines++; if(PRODUCT_GROUPS.has(r.grp)) o.items+=r.qty; if(r.inv) o.orders.add(r.inv);} return months.map(k=>({ym:k, ...m.get(k), n:m.get(k).orders.size})); }
 function groupBy(rows, key){ const m=new Map(); for(const r of rows){ const k=key(r); if(!m.has(k)) m.set(k,[]); m.get(k).push(r);} return [...m].map(([k,rs])=>({key:k, ...agg(rs)})); }
 
 /* ---------- card scaffold ---------- */
@@ -342,7 +350,7 @@ const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(
 function columnChart(viz, W, months, series, opts){
   // series: [{name, cls, values, kind:'bar'|'line', color}] — bars share one baseline; optional line on same $ scale
   viz.replaceChildren();
-  const n=months.length; const Hh=opts.height||260, padL=52, padR=12, padT=14, padB=30;
+  const n=months.length; const Hh=opts.height||270, padL=58, padR=12, padT=14, padB=32;
   const plotW=Math.max(60, W-padL-padR), plotH=Hh-padT-padB;
   const maxV=Math.max(0, ...series.flatMap(s=>s.values.filter(v=>v!=null)));
   if (maxV<=0){ viz.append(H('div','empty','No sales match these filters')); return; }
@@ -355,7 +363,7 @@ function columnChart(viz, W, months, series, opts){
   const bars=series.filter(s=>s.kind!=='line'); const lines=series.filter(s=>s.kind==='line');
   // x labels
   const labelEvery = n<=14 ? 1 : (n<=40 ? 3 : 0);
-  months.forEach((ym,i)=>{ const mm=+ym.slice(5,7); const yy=ym.slice(0,4); let lab=null; if (labelEvery===1) lab = MONTHS[mm-1] + ((mm===1||i===0) && n>1 ? ` ’${yy.slice(2)}` : ''); else if (labelEvery===3){ if (mm%3===1) lab = MONTHS[mm-1] + (mm===1?` ’${yy.slice(2)}`:''); } else if (mm===1) lab=yy; if (lab) svg.append(S('text',{x:xOf(i),y:Hh-10,'text-anchor':'middle',class:'ax'},lab)); });
+  months.forEach((ym,i)=>{ const mm=+ym.slice(5,7); const yy=ym.slice(0,4); let lab=null; if (opts.xLabel) lab=opts.xLabel(ym,i); else if (labelEvery===1) lab = MONTHS[mm-1] + ((mm===1||i===0) && n>1 ? ` ’${yy.slice(2)}` : ''); else if (labelEvery===3){ if (mm%3===1) lab = MONTHS[mm-1] + (mm===1?` ’${yy.slice(2)}`:''); } else if (mm===1) lab=yy; if (lab) svg.append(S('text',{x:xOf(i),y:Hh-10,'text-anchor':'middle',class:'ax'},lab)); });
   // bars (grouped if several)
   const nb=bars.length||1; const gw=(bw-2*(nb-1))/nb;
   bars.forEach((s,si)=>{ s.values.forEach((v,i)=>{ if(v==null) return; const h=Math.max(0,(v/max)*plotH); const x=xOf(i)-bw/2+si*(gw+2); const y=yOf(v); const r=Math.min(4,gw/2,h); const d=h<=0?'' : `M${x},${y+h} V${y+r} Q${x},${y} ${x+r},${y} H${x+gw-r} Q${x+gw},${y} ${x+gw},${y+r} V${y+h} Z`; if(d) svg.append(S('path',{d, class:'bar '+s.cls, 'data-i':i})); }); });
@@ -370,7 +378,7 @@ function columnChart(viz, W, months, series, opts){
 function yoyChart(viz, W, data, focus, prior){
   // data: {year: [12 values|null]}
   viz.replaceChildren();
-  const Hh=260, padL=52, padR=44, padT=14, padB=30; const plotW=Math.max(60,W-padL-padR), plotH=Hh-padT-padB;
+  const Hh=270, padL=58, padR=48, padT=14, padB=32; const plotW=Math.max(60,W-padL-padR), plotH=Hh-padT-padB;
   const ys=Object.keys(data).map(Number).sort();
   const maxV=Math.max(0, ...ys.flatMap(y=>data[y].filter(v=>v!=null)));
   if (maxV<=0){ viz.append(H('div','empty','No sales match these filters')); return; }
@@ -395,11 +403,11 @@ function hbarChart(viz, W, items, opts){
   // items: [{label, value, cls?, tip:[[name,val]]}] single hue unless cls given
   viz.replaceChildren();
   if (!items.length || Math.max(...items.map(i=>i.value))<=0){ viz.append(H('div','empty','No sales match these filters')); return; }
-  const rowH=30, padT=6, padB=6, labelW=Math.min(170, Math.max(96, W*0.28)), valW=64, padR=10;
+  const rowH=33, padT=6, padB=6, labelW=Math.min(180, Math.max(104, W*0.3)), valW=72, padR=10;
   const Hh=padT+padB+rowH*items.length; const x0=labelW+8, plotW=Math.max(40, W-x0-valW-padR);
   const max=Math.max(...items.map(i=>i.value));
   const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`,width:W,height:Hh,role:'img','aria-label':opts.aria||''});
-  const maxChars=Math.floor(labelW/6.6);
+  const maxChars=Math.floor(labelW/7.3);
   items.forEach((it,i)=>{ const y=padT+rowH*i+rowH/2; const w=Math.max(0,(it.value/max)*plotW); const bh=18; const r=Math.min(4,w); const d=w>0?`M${x0},${y-bh/2} H${x0+w-r} Q${x0+w},${y-bh/2} ${x0+w},${y-bh/2+r} V${y+bh/2-r} Q${x0+w},${y+bh/2} ${x0+w-r},${y+bh/2} H${x0} Z`:'';
     const lab=S('text',{x:x0-8,y:y+4,'text-anchor':'end',class:'lbl'},truncate(it.label,maxChars)); lab.append(S('title',null,it.label)); svg.append(lab);
     if(d) svg.append(S('path',{d,class:'bar '+(it.cls||'c1')}));
@@ -413,7 +421,7 @@ function hbarChart(viz, W, items, opts){
 function stackedChart(viz, W, months, series, opts){
   // series: [{name, cls, color, values}] counts stacked per month
   viz.replaceChildren();
-  const n=months.length, Hh=200, padL=36, padR=12, padT=10, padB=30; const plotW=Math.max(60,W-padL-padR), plotH=Hh-padT-padB;
+  const n=months.length, Hh=210, padL=40, padR=12, padT=10, padB=32; const plotW=Math.max(60,W-padL-padR), plotH=Hh-padT-padB;
   const totals=months.map((_,i)=>series.reduce((a,s)=>a+(s.values[i]||0),0)); const maxV=Math.max(0,...totals);
   if (maxV<=0){ viz.append(H('div','empty','No cancellations or returns in this period')); return; }
   const {ticks,max}=niceTicks(maxV,3);
@@ -421,7 +429,7 @@ function stackedChart(viz, W, months, series, opts){
   const yOf=v=>padT+plotH-(v/max)*plotH; const slot=plotW/n, bw=Math.min(24,Math.max(2,slot-Math.max(2,slot*0.35))), xOf=i=>padL+slot*i+slot/2;
   for(const t of ticks){ const y=yOf(t); svg.append(S('line',{x1:padL,x2:W-padR,y1:y,y2:y,class:t===0?'base':'gl'})); svg.append(S('text',{x:padL-8,y:y+4,'text-anchor':'end',class:'ax'},int(t))); }
   const labelEvery = n<=14 ? 1 : (n<=40 ? 3 : 0);
-  months.forEach((ym,i)=>{ const mm=+ym.slice(5,7), yy=ym.slice(0,4); let lab=null; if(labelEvery===1) lab=MONTHS[mm-1]+((mm===1||i===0)&&n>1?` ’${yy.slice(2)}`:''); else if(labelEvery===3){ if(mm%3===1) lab=MONTHS[mm-1]+(mm===1?` ’${yy.slice(2)}`:''); } else if(mm===1) lab=yy; if(lab) svg.append(S('text',{x:xOf(i),y:Hh-10,'text-anchor':'middle',class:'ax'},lab)); });
+  months.forEach((ym,i)=>{ const mm=+ym.slice(5,7), yy=ym.slice(0,4); let lab=null; if(opts.xLabel) lab=opts.xLabel(ym,i); else if(labelEvery===1) lab=MONTHS[mm-1]+((mm===1||i===0)&&n>1?` ’${yy.slice(2)}`:''); else if(labelEvery===3){ if(mm%3===1) lab=MONTHS[mm-1]+(mm===1?` ’${yy.slice(2)}`:''); } else if(mm===1) lab=yy; if(lab) svg.append(S('text',{x:xOf(i),y:Hh-10,'text-anchor':'middle',class:'ax'},lab)); });
   months.forEach((_,i)=>{ let acc=0; series.forEach((s,si)=>{ const v=s.values[i]||0; if(v<=0) return; const y1=yOf(acc), y0=yOf(acc+v); const h=Math.max(0,y1-y0-(acc>0?2:0)); const x=xOf(i)-bw/2; const top=y0; if(h>0) svg.append(S('rect',{x,y:top,width:bw,height:h,class:'seg '+s.cls,'data-i':i, rx: 0})); acc+=v; }); });
   months.forEach((ym,i)=>{ const rect=S('rect',{x:padL+slot*i,y:padT,width:slot,height:plotH,class:'hit',tabindex:0}); const show=e=>{ svg.querySelectorAll('.seg.hover').forEach(b=>b.classList.remove('hover')); svg.querySelectorAll(`.seg[data-i="${i}"]`).forEach(b=>b.classList.add('hover')); showTip(e.pageX!=null?e:{pageX:rect.getBoundingClientRect().left+window.scrollX,pageY:rect.getBoundingClientRect().top+window.scrollY}, opts.tipTitle(i), [...series.map(s=>[s.name, int(s.values[i]||0), s.color]), ['Total', int(totals[i])]]); }; rect.addEventListener('pointerenter',show); rect.addEventListener('pointermove',moveTip); rect.addEventListener('focus',show); rect.addEventListener('pointerleave',()=>{svg.querySelectorAll('.seg.hover').forEach(b=>b.classList.remove('hover')); hideTip();}); rect.addEventListener('blur',hideTip); svg.append(rect); });
   viz.append(svg); viz.append(legend(series.map(s=>({label:s.name,color:s.color}))));
@@ -434,7 +442,7 @@ function sparkline(vals){
 
 /* ---------- render ---------- */
 const $=id=>document.getElementById(id);
-let W=800; const cards={trend:$('cardTrend'),yoy:$('cardYoy'),channel:$('cardChannel'),group:$('cardGroup'),seller:$('cardSeller'),supplier:$('cardSupplier'),returns:$('cardReturns'),table:$('cardTable')};
+let W=800; const cards={trend:$('cardTrend'),yoy:$('cardYoy'),channel:$('cardChannel'),group:$('cardGroup'),units:$('cardUnits'),seller:$('cardSeller'),supplier:$('cardSupplier'),returns:$('cardReturns'),table:$('cardTable')};
 function vizWidth(el){ return Math.max(280, el.clientWidth-34); }
 
 function renderFilters(){
@@ -455,14 +463,18 @@ function renderFilters(){
   const pays=countDesc(R.map(r=>r.payg));
   fill($('fChannel'),'channel',chans,'All channels'); fill($('fGroup'),'group',groups,'All products'); fill($('fType'),'type',types,'All types'); fill($('fSupplier'),'supplier',sups,'All suppliers'); fill($('fSeller'),'seller',sellers,'All sellers'); fill($('fPay'),'pay',pays,'All payment methods');
   fill($('fStatus'),'status',Object.entries(STATUS_LABEL),'Sold + returns');
-  $('reset').onclick=()=>{ Object.assign(f,{period:String(curYear), channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''}); saveState(); renderFilters(); renderAll(); };
+  { const sel=$('fMonth'); sel.replaceChildren(); const o=H('option',null,'All months'); o.value='0'; sel.append(o); MONTHS_FULL.forEach((m,i)=>{ const oo=H('option',null,m); oo.value=String(i+1); sel.append(oo); }); sel.value=String(f.month||0); sel.onchange=()=>{ f.month=+sel.value; saveState(); renderAll(); }; }
+  $('reset').onclick=()=>{ Object.assign(f,{period:String(curYear), month:0, channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''}); saveState(); renderFilters(); renderAll(); };
 }
 
 function renderAll(){
   W=vizWidth(cards.trend);
   const P=period(); const base=R.filter(r=>dimOK(r)); const sales=base.filter(isSale); const cur=sales.filter(r=>inRange(r,P.range)); const prev=P.cmp? sales.filter(r=>inRange(r,P.cmp)) : null;
   const A=agg(cur), B=prev?agg(prev):null;
-  const months=monthsBetween(P.range[0],P.range[1]); const mm=byMonth(cur,months);
+  const monthMode=f.month>0, mm2=String(f.month).padStart(2,'0');
+  const trendRows = monthMode ? sales : cur;
+  const months = monthMode ? years.map(y=>`${y}-${mm2}`).filter(k=>k<=maxDate.slice(0,7)) : monthsBetween(P.range[0],P.range[1]);
+  const mm=byMonth(trendRows,months);
   
   const dimTxt=[f.channel!=='all'?f.channel:null, f.group!=='all'?f.group:null, f.type!=='all'?titleCase(f.type):null, f.supplier!=='all'?f.supplier:null, f.seller!=='all'?f.seller:null, f.pay!=='all'?f.pay:null, f.status!=='all'?STATUS_LABEL[f.status]:null].filter(Boolean).join(' · ');
   $('subtitle').textContent = `${P.name}${dimTxt?' · '+dimTxt:''}`;
@@ -476,21 +488,25 @@ function renderAll(){
   k.append(tile('Gross profit', money(A.profit), A.profit, B?.profit, sparkline(mm.map(x=>x.profit))));
   k.append(tile('Profit margin', pct(A.margin), A.margin, B?.margin, null, true, true));
   k.append(tile('Orders', int(A.n), A.n, B?.n, sparkline(mm.map(x=>x.n))));
+  k.append(tile('Products sold', int(A.items), A.items, B?.items, sparkline(mm.map(x=>x.items))));
   k.append(tile('Wheels & tires sold', int(A.units), A.units, B?.units, null));
   k.append(tile('Avg order value', isFinite(A.aov)?money(A.aov,true):'—', A.aov, B?.aov, null));
 
   /* Trend */
-  { const c=card(cards.trend,'Monthly net sales and gross profit', P.name); columnChart(c.viz, W, months, [ {name:'Net sales',cls:'c1',color:cssVar('--s1'),values:mm.map(x=>x.sales)}, {name:'Gross profit',cls:'l2',fillCls:'c2',color:cssVar('--s2'),values:mm.map(x=>x.profit),kind:'line'} ], {aria:'Monthly net sales bars with gross profit line', tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`, tipRows:i=>[['Net sales',money(mm[i].sales,true),cssVar('--s1')],['Gross profit',money(mm[i].profit,true),cssVar('--s2')],['Margin',pct(mm[i].sales?mm[i].profit/mm[i].sales:NaN)],['Orders',int(mm[i].n)]]}); table(c.tv,['Month','Net sales','Gross profit','Margin','Orders'], mm.map(x=>[`${MONTHS[+x.ym.slice(5,7)-1]} ${x.ym.slice(0,4)}`, money(x.sales,true), money(x.profit,true), pct(x.sales?x.profit/x.sales:NaN), int(x.n)])); }
+  { const c=card(cards.trend, monthMode?`${MONTHS_FULL[f.month-1]} net sales and gross profit, by year`:'Monthly net sales and gross profit', monthMode?`${MONTHS_FULL[f.month-1]} of every year${dimTxt?' · '+dimTxt:''}`:P.name); columnChart(c.viz, W, months, [ {name:'Net sales',cls:'c1',color:cssVar('--s1'),values:mm.map(x=>x.sales)}, {name:'Gross profit',cls:'l2',fillCls:'c2',color:cssVar('--s2'),values:mm.map(x=>x.profit),kind:'line'} ], {aria:'Monthly net sales bars with gross profit line', xLabel: monthMode ? (ym=>ym.slice(0,4)) : null, tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`, tipRows:i=>[['Net sales',money(mm[i].sales,true),cssVar('--s1')],['Gross profit',money(mm[i].profit,true),cssVar('--s2')],['Margin',pct(mm[i].sales?mm[i].profit/mm[i].sales:NaN)],['Orders',int(mm[i].n)],['Products sold',int(mm[i].items)]]}); table(c.tv,['Month','Net sales','Gross profit','Margin','Orders','Products sold'], mm.map(x=>[`${MONTHS[+x.ym.slice(5,7)-1]} ${x.ym.slice(0,4)}`, money(x.sales,true), money(x.profit,true), pct(x.sales?x.profit/x.sales:NaN), int(x.n), int(x.items)])); }
 
   /* YoY */
-  { const focus = /^\d{4}$/.test(P.id)? +P.id : curYear; const prior = years.includes(focus-1)? focus-1 : null; const data={}; for(const y of years){ const arr=Array(12).fill(null); const rs=sales.filter(r=>r.y===y); for(const r of rs){ arr[r.m-1]=(arr[r.m-1]||0)+r.sales; } if (y===curYear){ const lastM=+maxDate.slice(5,7); for(let i=0;i<lastM;i++) if(arr[i]==null) arr[i]=0; } else { const first=Math.min(...rs.map(r=>r.m), 13); for(let i=first-1;i<12;i++) if(arr[i]==null) arr[i]=0; } data[y]=arr; }
+  { const focus = /^\d{4}$/.test(P.id)? +P.id : curYear; const prior = years.includes(focus-1)? focus-1 : null; const data={}; const yoyRows=R.filter(r=>isSale(r)&&dimOK(r,false,true)); for(const y of years){ const arr=Array(12).fill(null); const rs=yoyRows.filter(r=>r.y===y); for(const r of rs){ arr[r.m-1]=(arr[r.m-1]||0)+r.sales; } if (y===curYear){ const lastM=+maxDate.slice(5,7); for(let i=0;i<lastM;i++) if(arr[i]==null) arr[i]=0; } else { const first=Math.min(...rs.map(r=>r.m), 13); for(let i=first-1;i<12;i++) if(arr[i]==null) arr[i]=0; } data[y]=arr; }
     const c=card(cards.yoy,'Net sales by month, year over year', `All years${dimTxt?' · '+dimTxt:''} · ${focus} highlighted`); yoyChart(c.viz, W, data, focus, prior); const hdr=['Month',...years.map(String)]; table(c.tv,hdr, MONTHS.map((m,i)=>[m,...years.map(y=>data[y][i]==null?'—':money(data[y][i],true))])); }
 
   /* Channel */
   { const g=groupBy(cur,r=>r.ch).sort((a,b)=>b.sales-a.sales); const c=card(cards.channel,'Sales channel', P.name); hbarChart(c.viz, vizWidth(cards.channel), g.map(x=>({label:x.key,value:x.sales,cls:'c'+(CH_SLOT[x.key]||8),tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Orders',int(x.n)],['Share of sales',pct(A.sales?x.sales/A.sales:NaN)]]})), {aria:'Net sales by channel', legend:g.map(x=>({label:x.key,color:cssVar('--s'+(CH_SLOT[x.key]||8))}))}); table(c.tv,['Channel','Net sales','Profit','Margin','Orders','Share'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n),pct(A.sales?x.sales/A.sales:NaN)])); }
 
   /* Product group */
-  { const g=groupBy(cur,r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)); const c=card(cards.group,'Product mix', P.name); hbarChart(c.viz, vizWidth(cards.group), g.map(x=>({label:x.key,value:x.sales,tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Units',int(x.units||x.lines)],['Share of sales',pct(A.sales?x.sales/A.sales:NaN)]]})), {aria:'Net sales by product group'}); table(c.tv,['Product','Net sales','Profit','Margin','Lines','Share'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.lines),pct(A.sales?x.sales/A.sales:NaN)])); }
+  { const g=groupBy(cur,r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)); const c=card(cards.group,'Product mix', P.name); hbarChart(c.viz, vizWidth(cards.group), g.map(x=>({label:x.key,value:x.sales,tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Units sold',int(x.items)],['Share of sales',pct(A.sales?x.sales/A.sales:NaN)]]})), {aria:'Net sales by product group'}); table(c.tv,['Product','Net sales','Profit','Margin','Units','Share'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.items),pct(A.sales?x.sales/A.sales:NaN)])); }
+
+  /* Units sold */
+  { const g=groupBy(cur.filter(r=>PRODUCT_GROUPS.has(r.grp)),r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)); const total=g.reduce((a,x)=>a+x.items,0); const c=card(cards.units,'Units sold by product', `${int(total)} products · ${P.name}`); hbarChart(c.viz, vizWidth(cards.units), g.map(x=>({label:x.key,value:x.items,valueLabel:int(x.items),tip:[['Units sold',int(x.items)],['Net sales',money(x.sales,true)],['Avg price per unit',x.items?money(x.sales/x.items,true):'—'],['Share of units',pct(total?x.items/total:NaN)]]})), {aria:'Units sold by product group'}); table(c.tv,['Product','Units','Net sales','Avg price per unit','Share of units'], g.map(x=>[x.key,int(x.items),money(x.sales,true),x.items?money(x.sales/x.items,true):'—',pct(total?x.items/total:NaN)])); }
 
   /* Seller */
   { const g=groupBy(cur,r=>r.seller||'Not recorded').sort((a,b)=>b.sales-a.sales); const c=card(cards.seller,'Sales by seller', 'Seller column of the ledger · '+P.name); hbarChart(c.viz, vizWidth(cards.seller), g.map(x=>({label:x.key,value:x.sales,cls:x.key==='Not recorded'?'cde':'c1',tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Orders',int(x.n)]]})), {aria:'Net sales by seller'}); table(c.tv,['Seller','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n)])); }
@@ -508,7 +524,7 @@ function renderAll(){
     c.viz.append(side);
     const chartHost=H('div'); c.viz.append(chartHost);
     const cnt=rs=>{ const m=new Map(months.map(k=>[k,new Set()])); for(const r of rs){ if(m.has(r.ym)) m.get(r.ym).add(r.inv); } return months.map(k=>m.get(k).size); };
-    stackedChart(chartHost, vizWidth(cards.returns), months, [ {name:'Canceled',cls:'o1',color:cssVar('--o1'),values:cnt(can)}, {name:'RMA',cls:'o2',color:cssVar('--o2'),values:cnt(rma)}, {name:'Returned / refunded',cls:'o3',color:cssVar('--o3'),values:cnt([...ret,...loss])} ], {aria:'Canceled, RMA and returned orders per month', tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`});
+    stackedChart(chartHost, vizWidth(cards.returns), months, [ {name:'Canceled',cls:'o1',color:cssVar('--o1'),values:cnt(can)}, {name:'RMA',cls:'o2',color:cssVar('--o2'),values:cnt(rma)}, {name:'Returned / refunded',cls:'o3',color:cssVar('--o3'),values:cnt([...ret,...loss])} ], {aria:'Canceled, RMA and returned orders per month', xLabel: monthMode ? (ym=>ym.slice(0,4)) : null, tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`});
     const cm=cnt(can), rm=cnt(rma), tm=cnt([...ret,...loss]); table(c.tv,['Month','Canceled','RMA','Returned / refunded'], months.map((k,i)=>[`${MONTHS[+k.slice(5,7)-1]} ${k.slice(0,4)}`, int(cm[i]), int(rm[i]), int(tm[i])])); }
 
   /* Invoice table */
@@ -563,7 +579,7 @@ function renderNotes(){
   const sec=(title, items)=>{ const d=H('div'); d.append(H('h3',null,title)); const ul=H('ul'); for(const it of items){ const li=H('li'); if (typeof it==='string') li.textContent=it; else li.append(...it); ul.append(li);} d.append(ul); return d; };
   const ex=DIAG, dt=DIAG;
   const a=H('a',null,'the Google Sheet'); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener';
-  n.append(sec('Where the numbers come from',[ [document.createTextNode('Tab “'+META.tab+'” of '), a, document.createTextNode(`, ${int(R.length)} invoice lines from ${fmtDate(minDate)} to ${fmtDate(maxDate)}${SOURCE.live?', read live from the sheet':', from the snapshot embedded in this page'}.`)], 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.', 'Orders count distinct invoice numbers. “Wheels & tires sold” sums QTY on wheel, tire and package lines only.', 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.' ]));
+  n.append(sec('Where the numbers come from',[ [document.createTextNode('Tab “'+META.tab+'” of '), a, document.createTextNode(`, ${int(R.length)} invoice lines from ${fmtDate(minDate)} to ${fmtDate(maxDate)}${SOURCE.live?', read live from the sheet':', from the snapshot embedded in this page'}.`)], 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.', 'Orders count distinct invoice numbers. “Products sold” sums the QTY column on wheel, tire, package and accessory lines (labor, shipping and fee lines are not products). “Wheels & tires sold” counts wheel, tire and package units only. Return lines with negative quantities reduce the totals.', 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.' ]));
   n.append(sec('What was left out or repaired',[ `Canceled orders are excluded from sales and shown only in the cancellations panel. Rows marked TEST were dropped (${int(ex['skip: TEST rows']||0)} lines).`, 'RMA and returned or refunded orders stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.', `Month and year come from the MONTH and YEAR columns. ${int(dt['date swapped']||0)} DATE cells had day and month swapped and were repaired; ${int((dt['date mismatch']||0)+(dt['date missing']||0)+(dt['date clamped']||0))} unreadable dates were placed within their month.`, `${int(ex['skip: no MONTH (empty pre-filled rows)']||0)} empty pre-filled rows and ${int(ex['skip: no YEAR (summary rows)']||0)} summary rows at the bottom of the tab were skipped.` ]));
   n.append(sec('Keeping it current',[ 'The page reads the sheet directly every time it opens, every 10 minutes while it stays open, and when you press Refresh. New rows in the sheet show up on the next read.', 'If the sheet cannot be reached, the page falls back to the snapshot embedded when it was last built (python3 build.py in the project folder).', 'Filters are remembered in this browser only. Every chart has a Table view with the same numbers.' ]));
 }
