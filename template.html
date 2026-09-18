@@ -68,18 +68,23 @@ button{font:inherit;color:inherit}
 .hdr .meta code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);border:1px solid var(--border);padding:1px 5px;border-radius:3px}
 
 /* filters */
-.filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:10px}
-.filters.last{margin-bottom:18px}
-.sel input[type=date]{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:5px 8px;color-scheme:inherit}
+.fbar{background:var(--surface);border:1px solid var(--border);border-radius:4px;box-shadow:var(--shadow);padding:14px 16px 16px;margin-bottom:14px;display:grid;gap:14px}
+.frow{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:flex-end}
+.fgroup{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fgroup.grow{flex:1 1 460px}
+.flab{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);line-height:1.2}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 16px;border-top:1px solid var(--grid);padding-top:14px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--chip-on-bg);background:var(--surface);color:var(--ink);border-radius:4px;padding:7px 14px;font-size:14.5px;font-weight:700;cursor:pointer;line-height:1.2}
-.chip:hover{background:var(--surface-2)}
-.chip[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.chip{border:1px solid var(--chip-on-bg);background:var(--surface);color:var(--ink);border-radius:4px;padding:0 14px;height:40px;font-size:14.5px;font-weight:700;cursor:pointer;line-height:1}
 .chip:hover{border-color:var(--brand-deep)}
-.sel{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;color:var(--ink-2)}
-.sel select{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:6px 8px;min-width:110px;max-width:220px}
-.spacer{flex:1}
-.reset{background:none;border:0;color:var(--link);cursor:pointer;font-size:14.5px;padding:4px 6px}
+.chip[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.fbar select,.fbar input[type=date]{font:inherit;font-size:14.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:0 10px;height:40px;width:100%;min-width:0;color-scheme:inherit}
+.frow select,.frow input[type=date]{width:160px;max-width:100%}
+.fbar select:hover,.fbar input[type=date]:hover{border-color:var(--ink)}
+.reset{height:40px;border:1px solid var(--chip-on-bg);background:var(--surface);color:var(--ink);border-radius:4px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer;padding:0 14px}
+.reset:hover{border-color:var(--brand-deep);color:var(--brand-deep)}
+.hdr .reset{height:auto;border:0;background:none;color:var(--link);padding:0 6px;font-weight:600}
+@media (max-width:560px){ .frow select,.frow input[type=date]{width:100%} .frow .fgroup:not(.grow){flex:1 1 40%} .reset{width:100%} }
 
 /* kpis */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:14px}
@@ -173,23 +178,24 @@ tr:hover td{background:var(--surface-2)}
 </header></div>
 <div class="wrap">
 
-  <div class="filters" role="group" aria-label="Period">
-    <div class="chips" id="periodChips"></div>
-    <label class="sel">From <input type="date" id="fFrom"></label>
-    <label class="sel">To <input type="date" id="fTo"></label>
-    <label class="sel">Month <select id="fMonth"></select></label>
-  </div>
-  <div class="filters last" role="group" aria-label="Filters">
-    <label class="sel">Channel <select id="fChannel"></select></label>
-    <label class="sel">Product <select id="fGroup"></select></label>
-    <label class="sel">Type <select id="fType"></select></label>
-    <label class="sel">Supplier <select id="fSupplier"></select></label>
-    <label class="sel">Seller <select id="fSeller"></select></label>
-    <label class="sel">Payment <select id="fPay"></select></label>
-    <label class="sel">Status <select id="fStatus"></select></label>
-    <span class="spacer"></span>
-    <button class="reset" id="reset" type="button">Reset filters</button>
-  </div>
+  <section class="fbar" aria-label="Filters">
+    <div class="frow">
+      <div class="fgroup grow"><span class="flab">Period</span><div class="chips" id="periodChips"></div></div>
+      <div class="fgroup"><label class="flab" for="fMonth">Month</label><select id="fMonth"></select></div>
+      <div class="fgroup"><label class="flab" for="fFrom">From</label><input type="date" id="fFrom"></div>
+      <div class="fgroup"><label class="flab" for="fTo">To</label><input type="date" id="fTo"></div>
+      <div class="fgroup"><span class="flab" aria-hidden="true">&nbsp;</span><button class="reset" id="reset" type="button">Reset filters</button></div>
+    </div>
+    <div class="fgrid">
+      <div class="fgroup"><label class="flab" for="fChannel">Channel</label><select id="fChannel"></select></div>
+      <div class="fgroup"><label class="flab" for="fGroup">Product</label><select id="fGroup"></select></div>
+      <div class="fgroup"><label class="flab" for="fType">Type</label><select id="fType"></select></div>
+      <div class="fgroup"><label class="flab" for="fSupplier">Supplier</label><select id="fSupplier"></select></div>
+      <div class="fgroup"><label class="flab" for="fSeller">Seller</label><select id="fSeller"></select></div>
+      <div class="fgroup"><label class="flab" for="fPay">Payment</label><select id="fPay"></select></div>
+      <div class="fgroup"><label class="flab" for="fStatus">Status</label><select id="fStatus"></select></div>
+    </div>
+  </section>
 
   <section class="kpis" id="kpis" aria-label="Key figures"></section>
 
