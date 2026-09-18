@@ -68,14 +68,16 @@ button{font:inherit;color:inherit}
 .hdr .meta code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);border:1px solid var(--border);padding:1px 5px;border-radius:3px}
 
 /* filters */
-.filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:18px}
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:10px}
+.filters.last{margin-bottom:18px}
+.sel input[type=date]{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:5px 8px;color-scheme:inherit}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--chip-on-bg);background:var(--surface);color:var(--ink);border-radius:4px;padding:6px 13px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.2}
 .chip:hover{background:var(--surface-2)}
 .chip[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
 .chip:hover{border-color:var(--brand-deep)}
 .sel{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
-.sel select{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:6px 8px;min-width:120px}
+.sel select{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:6px 8px;min-width:110px;max-width:220px}
 .spacer{flex:1}
 .reset{background:none;border:0;color:var(--link);cursor:pointer;font-size:13px;padding:4px 6px}
 
@@ -170,11 +172,19 @@ tr:hover td{background:var(--surface-2)}
 </header></div>
 <div class="wrap">
 
-  <div class="filters" role="group" aria-label="Filters">
+  <div class="filters" role="group" aria-label="Period">
     <div class="chips" id="periodChips"></div>
+    <label class="sel">From <input type="date" id="fFrom"></label>
+    <label class="sel">To <input type="date" id="fTo"></label>
+  </div>
+  <div class="filters last" role="group" aria-label="Filters">
     <label class="sel">Channel <select id="fChannel"></select></label>
     <label class="sel">Product <select id="fGroup"></select></label>
+    <label class="sel">Type <select id="fType"></select></label>
+    <label class="sel">Supplier <select id="fSupplier"></select></label>
     <label class="sel">Seller <select id="fSeller"></select></label>
+    <label class="sel">Payment <select id="fPay"></select></label>
+    <label class="sel">Status <select id="fStatus"></select></label>
     <span class="spacer"></span>
     <button class="reset" id="reset" type="button">Reset filters</button>
   </div>
@@ -219,6 +229,7 @@ function typeGroup(t){ t=t.toUpperCase(); if(t.startsWith('NEW WHEEL')) return '
 function channelName(c){ const u=c.toUpperCase(); if(u.includes('SHOPIFY')) return 'Shopify'; if(u.includes('EBAY')) return 'eBay'; if(u.includes('AMAZON')) return 'Amazon'; return u?titleCase(u):'Unknown'; }
 function statusClass(s){ s=s.toUpperCase(); if(s.startsWith('CANCEL')) return 'canceled'; if(s.startsWith('TEST')) return 'test'; if(s.startsWith('FRAUD')||s.startsWith('CHARGEBACK')||s.startsWith('LOST')) return 'loss'; if(s.startsWith('RMA')) return 'rma'; if(s.startsWith('RETURN')||s.startsWith('REFUND')||s.startsWith('PARTIALLY REFUNDED')||s.includes('RETURN')) return 'return'; return 'ok'; }
 function sellerName(s){ s=s.toUpperCase().replace(/\s+/g,''); if(!s||s.startsWith('GASTADO')) return ''; s=s.replace(/JAMIE/g,'JAIME'); return s.split('/').filter(Boolean).map(titleCase).sort().join('/'); }
+function payGroup(p){ p=p.toUpperCase().trim(); if(!p||p==='NA'||p==='N/A') return 'Not recorded'; if(/AFFIRM|SNAP|ACIMA|PAY ?TOMORROW|INSTALLMENT|KAFENE|KATAPULT|WESTCREEK|KOALIFI|UOWN|FINANCE|FIANCE/.test(p)) return 'Financing'; if(p.includes('AMAZON')) return 'Amazon'; if(p.includes('EBAY')) return 'eBay'; if(p.includes('PAYPAL')) return 'PayPal'; if(/CASH|WIRE|ZELLE|CHECK|ACH\b|VENMO/.test(p)) return 'Cash / wire'; if(/VISA|MASTER|AMERICAN|AMEX|DISCOVER|APPLE|GOOGLE|SHOP PAY|SHOPIFY|CARD/.test(p)) return 'Card'; return 'Other'; }
 function resolveDay(s, mon){ const m=/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{2,4})/.exec(txt(s)); if(!m) return [1,'missing']; const a=+m[1], b=+m[2]; if(a===mon&&b>=1&&b<=31) return [b,'ok']; if(b===mon&&a>=1&&a<=31) return [a,'swapped']; return [(b>=1&&b<=31)?Math.min(b,28):1,'mismatch']; }
 function cleanCSV(text){
   const rows=parseCSV(text); if(!rows.length) throw new Error('empty file');
@@ -232,7 +243,7 @@ function cleanCSV(text){
     let [day,how]=resolveDay(g('date'),mon); let dt=new Date(Date.UTC(year,mon-1,day)); if(dt.getUTCMonth()!==mon-1){ dt=new Date(Date.UTC(year,mon-1,1)); how='clamped'; } bump('date '+how); const iso=dt.toISOString().slice(0,10);
     const ch=txt(g('ch')), st=txt(g('st')), ty=txt(g('type')), fu=txt(g('ful')); if([ch,st,ty,fu].some(x=>x.toUpperCase()==='TEST')){ bump('skip: TEST rows'); continue; }
     let sc=statusClass(st); if(sc==='ok'&&(ty.toUpperCase()==='CANCELED'||fu.toUpperCase()==='CANCELED')) sc='canceled';
-    out.push({d:iso,y:year,m:mon,ym:iso.slice(0,7),inv:txt(g('inv')),ch:channelName(ch),ful:fu?titleCase(fu):'—',st:st.toUpperCase()||'—',sc,grp:typeGroup(ty),type:ty.toUpperCase()||'—',prod:txt(g('prod')).replace(/\s+/g,' ').slice(0,110),qty:num(g('qty')),sales:num(g('sales')),cost:num(g('cost')),ship:num(g('ship')),fee:num(g('fee')),profit:num(g('profit')),seller:sellerName(txt(g('seller'))),rcost:num(g('rcost')),pay:txt(g('pay')).toUpperCase()}); }
+    out.push({d:iso,y:year,m:mon,ym:iso.slice(0,7),inv:txt(g('inv')),ch:channelName(ch),ful:fu?titleCase(fu):'—',st:st.toUpperCase()||'—',sc,grp:typeGroup(ty),type:ty.toUpperCase()||'—',prod:txt(g('prod')).replace(/\s+/g,' ').slice(0,110),qty:num(g('qty')),sales:num(g('sales')),cost:num(g('cost')),ship:num(g('ship')),fee:num(g('fee')),profit:num(g('profit')),seller:sellerName(txt(g('seller'))),rcost:num(g('rcost')),pay:txt(g('pay')).toUpperCase(), payg:payGroup(txt(g('pay')))}); }
   out.sort((a,b)=> a.d<b.d?-1:a.d>b.d?1:(a.inv<b.inv?-1:a.inv>b.inv?1:0));
   return {rows:out, diag};
 }
@@ -265,16 +276,18 @@ function setData(rows, diag, src){
   R=rows; DIAG=diag; SOURCE=src;
   maxDate=R.reduce((m,r)=>r.d>m?r.d:m,'0000'); minDate=R.reduce((m,r)=>r.d<m?r.d:m,'9999'); curYear=+maxDate.slice(0,4);
   years=[...new Set(R.map(r=>r.y))].sort(); PERIODS=buildPeriods();
-  if(!PERIODS.some(p=>p.id===f.period)) f.period=String(curYear);
+  if(!(f.period==='custom' && f.from && f.to) && !PERIODS.some(p=>p.id===f.period)) f.period=String(curYear);
   renderFilters(); renderAll();
 }
 
 /* ---------- state ---------- */
-const f = {period:null, channel:'all', group:'all', seller:'all'};
+const f = {period:null, channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''};
+const STATUS_LABEL={ok:'Clean sales only', rma:'RMA only', return:'Returns & refunds only'};
 try{ Object.assign(f, JSON.parse(localStorage.getItem('wbr-filters')||'{}')); }catch(e){}
 function saveState(){ try{ localStorage.setItem('wbr-filters', JSON.stringify(f)); }catch(e){} }
-const period = () => PERIODS.find(p=>p.id===f.period);
-const dimOK = r => (f.channel==='all'||r.ch===f.channel) && (f.group==='all'||r.grp===f.group) && (f.seller==='all'||r.seller===f.seller);
+function customPeriod(){ const a=f.from<=f.to?f.from:f.to, b=f.from<=f.to?f.to:f.from; const y=iso=>String(+iso.slice(0,4)-1)+iso.slice(4); return {id:'custom', label:'Custom dates', range:[a,b], cmp:[y(a),y(b)], cmpLabel:'vs same dates a year earlier', name:`${fmtDate(a)} – ${fmtDate(b)}`}; }
+const period = () => (f.period==='custom' && f.from && f.to) ? customPeriod() : PERIODS.find(p=>p.id===f.period);
+function dimOK(r, ignoreStatus){ return (f.channel==='all'||r.ch===f.channel) && (f.group==='all'||r.grp===f.group) && (f.type==='all'||r.type===f.type) && (f.seller==='all'||r.seller===f.seller) && (f.supplier==='all'||r.ful===f.supplier) && (f.pay==='all'||r.payg===f.pay) && (ignoreStatus || f.status==='all' || r.sc===f.status); }
 const inRange = (r,rg) => !rg || (r.d>=rg[0] && r.d<=rg[1]);
 
 /* ---------- formatting ---------- */
@@ -426,22 +439,32 @@ function vizWidth(el){ return Math.max(280, el.clientWidth-34); }
 
 function renderFilters(){
   const chips=$('periodChips'); chips.replaceChildren();
-  for(const p of PERIODS){ const b=H('button','chip',p.label); b.type='button'; b.setAttribute('aria-pressed',String(p.id===f.period)); b.addEventListener('click',()=>{ f.period=p.id; saveState(); renderAll(); }); chips.append(b); }
-  const fill=(sel,key,opts,allLabel)=>{ sel.replaceChildren(); const o=H('option',null,allLabel); o.value='all'; sel.append(o); for(const v of opts){ const oo=H('option',null,v); oo.value=v; sel.append(oo);} sel.value=f[key]; sel.onchange=()=>{ f[key]=sel.value; saveState(); renderAll(); }; };
-  const chans=[...new Set(R.filter(isSale).map(r=>r.ch))].sort((a,b)=>(CH_SLOT[a]||9)-(CH_SLOT[b]||9));
+  for(const p of PERIODS){ const b=H('button','chip',p.label); b.type='button'; b.setAttribute('aria-pressed',String(p.id===f.period)); b.addEventListener('click',()=>{ f.period=p.id; f.from=''; f.to=''; saveState(); renderFilters(); renderAll(); }); chips.append(b); }
+  const cc=H('button','chip','Custom dates'); cc.type='button'; cc.hidden=f.period!=='custom'; cc.setAttribute('aria-pressed',String(f.period==='custom')); chips.append(cc);
+  const from=$('fFrom'), to=$('fTo'); from.min=to.min=minDate; from.max=to.max=maxDate; from.value=f.from||''; to.value=f.to||'';
+  const onDate=()=>{ f.from=from.value; f.to=to.value; if(f.from&&f.to) f.period='custom'; else if(f.period==='custom') f.period=String(curYear); saveState(); renderFilters(); renderAll(); };
+  from.onchange=onDate; to.onchange=onDate;
+  const fill=(sel,key,opts,allLabel)=>{ sel.replaceChildren(); const o=H('option',null,allLabel); o.value='all'; sel.append(o); for(const v of opts){ const [val,lab]=Array.isArray(v)?v:[v,v]; const oo=H('option',null,lab); oo.value=val; sel.append(oo);} if(![...sel.options].some(o=>o.value===f[key])) f[key]='all'; sel.value=f[key]; sel.onchange=()=>{ f[key]=sel.value; if(key==='group') f.type='all'; saveState(); renderFilters(); renderAll(); }; };
+  const countDesc=arr=>{ const c=new Map(); for(const v of arr) c.set(v,(c.get(v)||0)+1); return [...c].sort((x,y)=>y[1]-x[1]||(x[0]<y[0]?-1:1)).map(x=>x[0]); };
+  const sales=R.filter(isSale);
+  const chans=[...new Set(sales.map(r=>r.ch))].sort((a,b)=>(CH_SLOT[a]||9)-(CH_SLOT[b]||9));
   const groups=GROUP_ORDER.filter(g=>R.some(r=>r.grp===g));
+  const types=countDesc(R.filter(r=>r.type!=='—' && (f.group==='all'||r.grp===f.group)).map(r=>r.type)).map(t=>[t,titleCase(t)]);
   const sellers=[...new Set(R.map(r=>r.seller).filter(Boolean))].sort();
-  fill($('fChannel'),'channel',chans,'All channels'); fill($('fGroup'),'group',groups,'All products'); fill($('fSeller'),'seller',sellers,'All sellers');
-  $('reset').onclick=()=>{ f.period=String(curYear); f.channel='all'; f.group='all'; f.seller='all'; saveState(); renderAll(); };
+  const sups=countDesc(R.filter(r=>r.ful!=='—').map(r=>r.ful));
+  const pays=countDesc(R.map(r=>r.payg));
+  fill($('fChannel'),'channel',chans,'All channels'); fill($('fGroup'),'group',groups,'All products'); fill($('fType'),'type',types,'All types'); fill($('fSupplier'),'supplier',sups,'All suppliers'); fill($('fSeller'),'seller',sellers,'All sellers'); fill($('fPay'),'pay',pays,'All payment methods');
+  fill($('fStatus'),'status',Object.entries(STATUS_LABEL),'Sold + returns');
+  $('reset').onclick=()=>{ Object.assign(f,{period:String(curYear), channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''}); saveState(); renderFilters(); renderAll(); };
 }
 
 function renderAll(){
   W=vizWidth(cards.trend);
-  const P=period(); const base=R.filter(dimOK); const sales=base.filter(isSale); const cur=sales.filter(r=>inRange(r,P.range)); const prev=P.cmp? sales.filter(r=>inRange(r,P.cmp)) : null;
+  const P=period(); const base=R.filter(r=>dimOK(r)); const sales=base.filter(isSale); const cur=sales.filter(r=>inRange(r,P.range)); const prev=P.cmp? sales.filter(r=>inRange(r,P.cmp)) : null;
   const A=agg(cur), B=prev?agg(prev):null;
   const months=monthsBetween(P.range[0],P.range[1]); const mm=byMonth(cur,months);
-  document.querySelectorAll('#periodChips .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===P.label)));
-  const dimTxt=[f.channel!=='all'?f.channel:null, f.group!=='all'?f.group:null, f.seller!=='all'?f.seller:null].filter(Boolean).join(' · ');
+  
+  const dimTxt=[f.channel!=='all'?f.channel:null, f.group!=='all'?f.group:null, f.type!=='all'?titleCase(f.type):null, f.supplier!=='all'?f.supplier:null, f.seller!=='all'?f.seller:null, f.pay!=='all'?f.pay:null, f.status!=='all'?STATUS_LABEL[f.status]:null].filter(Boolean).join(' · ');
   $('subtitle').textContent = `${P.name}${dimTxt?' · '+dimTxt:''}`;
   renderStatus();
 
@@ -477,7 +500,7 @@ function renderAll(){
     const c=card(cards.supplier,'Top suppliers by net sales', 'Fulfillment column · '+P.name); hbarChart(c.viz, vizWidth(cards.supplier), items, {aria:'Net sales by fulfillment supplier'}); table(c.tv,['Supplier','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n)])); }
 
   /* Returns & cancellations */
-  { const all=base.filter(r=>inRange(r,P.range)); const can=all.filter(r=>r.sc==='canceled'), rma=all.filter(r=>r.sc==='rma'), ret=all.filter(r=>r.sc==='return'), loss=all.filter(r=>r.sc==='loss');
+  { const all=R.filter(r=>dimOK(r,true)&&inRange(r,P.range)); const can=all.filter(r=>r.sc==='canceled'), rma=all.filter(r=>r.sc==='rma'), ret=all.filter(r=>r.sc==='return'), loss=all.filter(r=>r.sc==='loss');
     const c=card(cards.returns,'Cancellations and returns', P.name);
     const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',k),H('div','v',v),H('div','s',s)); return d; };
     const inv=rs=>new Set(rs.map(r=>r.inv)).size;
