@@ -23,6 +23,10 @@ and Spanish (EN / ES buttons); the choice is remembered per browser.
 **User guide:** `manual.html` is a plain-language manual for staff, served next to
 the dashboard and linked from the header and the login page.
 
+**Private sheet (optional):** `apps-script/SETUP.md` explains how to deploy a
+small Google Apps Script relay so the sheet can be shared with nobody but the
+owners while the dashboard keeps reading it live.
+
 ## Refresh the fallback snapshot
 
     python3 build.py

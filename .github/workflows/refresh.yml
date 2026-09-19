@@ -19,6 +19,7 @@ jobs:
           SHEET_ID: ${{ secrets.SHEET_ID }}
           SHEET_GID: ${{ secrets.SHEET_GID }}
           DASH_PASSWORD: ${{ secrets.DASH_PASSWORD }}
+          LIVE_URL: ${{ secrets.LIVE_URL }}
         run: python3 build.py
       - name: Commit if changed
         run: |

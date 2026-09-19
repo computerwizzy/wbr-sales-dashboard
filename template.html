@@ -640,7 +640,7 @@ function renderAll(){
 
 
 /* ---------- live data ---------- */
-const LIVE_URL=`https://docs.google.com/spreadsheets/d/${META.sheetId}/export?format=csv&gid=${META.gid}`;
+const LIVE_URL = META.liveUrl || `https://docs.google.com/spreadsheets/d/${META.sheetId}/export?format=csv&gid=${META.gid}`;
 const timeStr=d=>d? d.toLocaleTimeString(LANG==='es'?'es-MX':'en-US', {hour:'numeric', minute:'2-digit'}) : '';
 function renderStatus(){
   const m=$('hdrmeta'); m.replaceChildren();

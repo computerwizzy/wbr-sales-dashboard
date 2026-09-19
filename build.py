@@ -36,7 +36,7 @@ def read_env():
                 if line and not line.startswith("#") and "=" in line:
                     k, v = line.split("=", 1)
                     env[k.strip()] = v.strip().strip('"').strip("'")
-    for k in ("SHEET_URL", "SHEET_ID", "SHEET_GID", "DASH_PASSWORD"):
+    for k in ("SHEET_URL", "SHEET_ID", "SHEET_GID", "DASH_PASSWORD", "LIVE_URL"):
         if os.environ.get(k): env[k] = os.environ[k]
     return env
 
@@ -46,15 +46,15 @@ def sheet_id(env):
     if not m: sys.exit("No SHEET_ID or SHEET_URL found in .env (or the environment)")
     return m.group(1)
 
-def download(sid, gid):
-    url = f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
-    print("Downloading sheet tab", gid)
+def download(sid, gid, live_url=None):
+    url = live_url or f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
+    print("Downloading via relay" if live_url else f"Downloading sheet tab {gid}")
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=120) as r:
         data = r.read()
     text = data.decode("utf-8-sig")
     if "DATE" not in text[:500] or "VENTA" not in text[:500]:
-        sys.exit("The download does not look like the invoices tab (no DATE/VENTA header). Is the sheet still shared with anyone who has the link?")
+        sys.exit("The download does not look like the invoices tab (no DATE/VENTA header). Check LIVE_URL / the relay key, or whether the sheet is still shared." + (f" Got: {text[:80]!r}" if len(text) < 200 else ""))
     with open(CSV, "w", encoding="utf-8", newline="") as f:
         f.write(text)
     print(f"Saved sheet.csv ({len(data)/1024:.0f} KB, {text.count(chr(10))} lines)")
@@ -63,13 +63,14 @@ def logo_data_uri():
     if not os.path.exists(LOGO): sys.exit(f"Missing {LOGO}")
     return "data:image/png;base64," + base64.b64encode(open(LOGO, "rb").read()).decode()
 
-def render_app(sid, gid):
+def render_app(sid, gid, live_url=None):
     tpl = open(TEMPLATE, encoding="utf-8").read()
     csv_text = open(CSV, encoding="utf-8").read()
     meta = {
         "generated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "sheetId": sid, "gid": gid,
         "sheetUrl": f"https://docs.google.com/spreadsheets/d/{sid}/edit?gid={gid}",
+        "liveUrl": live_url or "",
         "tab": TAB,
     }
     payload = "const SNAPSHOT_CSV = " + json.dumps(csv_text, ensure_ascii=False) + ";\nconst META = " + json.dumps(meta, ensure_ascii=False) + ";"
@@ -108,6 +109,7 @@ if __name__ == "__main__":
     if not gid: sys.exit("SHEET_GID missing from .env (the gid of the invoices tab, from the sheet URL)")
     password = env.get("DASH_PASSWORD", "")
     if len(password) < 12: sys.exit("DASH_PASSWORD missing or shorter than 12 characters (set it in .env)")
-    if "--offline" not in sys.argv or not os.path.exists(CSV): download(sid, gid)
-    html = render_app(sid, gid)
+    live_url = env.get("LIVE_URL") or None
+    if "--offline" not in sys.argv or not os.path.exists(CSV): download(sid, gid, live_url)
+    html = render_app(sid, gid, live_url)
     render_login(encrypt(html, password))
