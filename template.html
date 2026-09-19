@@ -212,6 +212,9 @@ tr:hover td{background:var(--surface-2)}
   </section>
   <section class="grid g2">
     <div class="card" id="cardSupplier"></div>
+    <div class="card" id="cardCosts"></div>
+  </section>
+  <section class="grid g2">
     <div class="card" id="cardReturns"></div>
   </section>
   <section class="grid" style="grid-template-columns:1fr">
@@ -338,7 +341,7 @@ function moveTip(evt){ const pad=14, w=tip.offsetWidth, h=tip.offsetHeight; let 
 function hideTip(){ tip.hidden=true; }
 
 /* ---------- aggregation ---------- */
-function agg(rows){ const a={sales:0,profit:0,cost:0,ship:0,units:0,items:0,lines:0,orders:new Set()}; for(const r of rows){ a.sales+=r.sales; a.profit+=r.profit; a.cost+=r.cost; a.ship+=r.ship; a.lines++; if (UNIT_GROUPS.has(r.grp)) a.units+=r.qty; if (PRODUCT_GROUPS.has(r.grp)) a.items+=r.qty; if (r.inv) a.orders.add(r.inv);} a.n=a.orders.size; a.margin=a.sales? a.profit/a.sales : NaN; a.aov=a.n? a.sales/a.n : NaN; return a; }
+function agg(rows){ const a={sales:0,profit:0,cost:0,ship:0,fee:0,units:0,items:0,lines:0,orders:new Set()}; for(const r of rows){ a.sales+=r.sales; a.profit+=r.profit; a.cost+=r.cost; a.ship+=r.ship; a.fee+=r.fee; a.lines++; if (UNIT_GROUPS.has(r.grp)) a.units+=r.qty; if (PRODUCT_GROUPS.has(r.grp)) a.items+=r.qty; if (r.inv) a.orders.add(r.inv);} a.n=a.orders.size; a.margin=a.sales? a.profit/a.sales : NaN; a.aov=a.n? a.sales/a.n : NaN; return a; }
 function monthsBetween(a,b){ const out=[]; let ym=a.slice(0,7); const end=b.slice(0,7); while(ym<=end){ out.push(ym); ym=addMonths(ym+'-01',1).slice(0,7);} return out; }
 function byMonth(rows, months){ const m=new Map(months.map(k=>[k,{sales:0,profit:0,orders:new Set(),lines:0,items:0}])); for(const r of rows){ const o=m.get(r.ym); if(!o) continue; o.sales+=r.sales; o.profit+=r.profit; o.lines++; if(PRODUCT_GROUPS.has(r.grp)) o.items+=r.qty; if(r.inv) o.orders.add(r.inv);} return months.map(k=>({ym:k, ...m.get(k), n:m.get(k).orders.size})); }
 function groupBy(rows, key){ const m=new Map(); for(const r of rows){ const k=key(r); if(!m.has(k)) m.set(k,[]); m.get(k).push(r);} return [...m].map(([k,rs])=>({key:k, ...agg(rs)})); }
@@ -425,9 +428,10 @@ function hbarChart(viz, W, items, opts){
   const maxChars=Math.floor(labelW/7.3);
   items.forEach((it,i)=>{ const y=padT+rowH*i+rowH/2; const w=Math.max(0,(it.value/max)*plotW); const bh=18; const r=Math.min(4,w); const d=w>0?`M${x0},${y-bh/2} H${x0+w-r} Q${x0+w},${y-bh/2} ${x0+w},${y-bh/2+r} V${y+bh/2-r} Q${x0+w},${y+bh/2} ${x0+w-r},${y+bh/2} H${x0} Z`:'';
     const lab=S('text',{x:x0-8,y:y+4,'text-anchor':'end',class:'lbl'},truncate(it.label,maxChars)); lab.append(S('title',null,it.label)); svg.append(lab);
-    if(d) svg.append(S('path',{d,class:'bar '+(it.cls||'c1')}));
+    if(it.segs){ let sx=x0; it.segs.forEach((sg,si)=>{ const sw=Math.max(0,(sg.value/max)*plotW); if(sw<=0) return; const last=si===it.segs.length-1; const rr=last?Math.min(4,sw):0; const gap=si>0?2:0; const xa=sx+gap, wa=Math.max(0,sw-gap); const dd=`M${xa},${y-bh/2} H${xa+wa-rr} Q${xa+wa},${y-bh/2} ${xa+wa},${y-bh/2+rr} V${y+bh/2-rr} Q${xa+wa},${y+bh/2} ${xa+wa-rr},${y+bh/2} H${xa} Z`; svg.append(S('path',{d:dd,class:'bar '+sg.cls,'data-i':i})); sx+=sw; }); }
+    else if(d) svg.append(S('path',{d,class:'bar '+(it.cls||'c1'),'data-i':i}));
     svg.append(S('text',{x:x0+w+6,y:y+4,class:'dl'},it.valueLabel||money(it.value)));
-    const hit=S('rect',{x:0,y:padT+rowH*i,width:W,height:rowH,class:'hit',tabindex:0}); const show=e=>{ svg.querySelectorAll('.bar.hover').forEach(b=>b.classList.remove('hover')); if(d) svg.querySelectorAll('.bar')[[...items].filter((x,j)=>j<i&&x.value>0).length]?.classList.add('hover'); showTip(e.pageX!=null?e:{pageX:hit.getBoundingClientRect().left+window.scrollX+x0, pageY:hit.getBoundingClientRect().top+window.scrollY}, it.label, it.tip); }; hit.addEventListener('pointerenter',show); hit.addEventListener('pointermove',moveTip); hit.addEventListener('focus',show); hit.addEventListener('pointerleave',()=>{svg.querySelectorAll('.bar.hover').forEach(b=>b.classList.remove('hover')); hideTip();}); hit.addEventListener('blur',hideTip); svg.append(hit); });
+    const hit=S('rect',{x:0,y:padT+rowH*i,width:W,height:rowH,class:'hit',tabindex:0}); const show=e=>{ svg.querySelectorAll('.bar.hover').forEach(b=>b.classList.remove('hover')); svg.querySelectorAll(`.bar[data-i="${i}"]`).forEach(b=>b.classList.add('hover')); showTip(e.pageX!=null?e:{pageX:hit.getBoundingClientRect().left+window.scrollX+x0, pageY:hit.getBoundingClientRect().top+window.scrollY}, it.label, it.tip); }; hit.addEventListener('pointerenter',show); hit.addEventListener('pointermove',moveTip); hit.addEventListener('focus',show); hit.addEventListener('pointerleave',()=>{svg.querySelectorAll('.bar.hover').forEach(b=>b.classList.remove('hover')); hideTip();}); hit.addEventListener('blur',hideTip); svg.append(hit); });
   svg.append(S('line',{x1:x0,x2:x0,y1:padT,y2:Hh-padB,class:'base'}));
   viz.append(svg);
   if (opts.legend) viz.append(legend(opts.legend));
@@ -457,7 +461,7 @@ function sparkline(vals){
 
 /* ---------- render ---------- */
 const $=id=>document.getElementById(id);
-let W=800; const cards={trend:$('cardTrend'),yoy:$('cardYoy'),channel:$('cardChannel'),group:$('cardGroup'),units:$('cardUnits'),seller:$('cardSeller'),supplier:$('cardSupplier'),returns:$('cardReturns'),table:$('cardTable')};
+let W=800; const cards={trend:$('cardTrend'),yoy:$('cardYoy'),channel:$('cardChannel'),group:$('cardGroup'),units:$('cardUnits'),seller:$('cardSeller'),supplier:$('cardSupplier'),costs:$('cardCosts'),returns:$('cardReturns'),table:$('cardTable')};
 function vizWidth(el){ return Math.max(280, el.clientWidth-34); }
 
 function renderFilters(){
@@ -534,6 +538,15 @@ function renderAll(){
     const c=card(cards.supplier,'Purchases by supplier', `${money(totalCost)} spent on goods · ${P.name}`); hbarChart(c.viz, vizWidth(cards.supplier), items, {aria:'Cost of goods bought from each supplier'});
     table(c.tv,['Supplier','Purchases','Shipping','Share','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.cost),money(x.ship),pct(totalCost?x.cost/totalCost:NaN),money(x.sales),money(x.profit),pct(x.margin),int(x.n)])); }
 
+  /* What we paid: cost of goods, shipping, fees */
+  { const g=groupBy(cur,r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)).filter(x=>x.cost+x.ship>0);
+    const c=card(cards.costs,'What we paid', `Cost of goods, shipping and fees · ${P.name}`);
+    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',k),H('div','v',v),H('div','s',s)); return d; };
+    side.append(box('Cost of goods', money(A.cost), pct(A.sales?A.cost/A.sales:NaN)+' of net sales')); side.append(box('Shipping paid', money(A.ship), pct(A.sales?A.ship/A.sales:NaN)+' of net sales')); side.append(box('Marketplace & payment fees', money(A.fee), pct(A.sales?A.fee/A.sales:NaN)+' of net sales'));
+    c.viz.append(side); const host=H('div'); c.viz.append(host);
+    hbarChart(host, vizWidth(cards.costs), g.map(x=>({label:x.key, value:x.cost+x.ship, segs:[{value:x.cost,cls:'c1'},{value:x.ship,cls:'c2'}], tip:[['Cost of goods',money(x.cost)],['Shipping',money(x.ship)],['Fees',money(x.fee)],['Net sales',money(x.sales)],['Gross profit',money(x.profit)],['Margin',pct(x.margin)],['Avg cost per unit',x.items?money(x.cost/x.items):'—']]})), {aria:'Cost of goods and shipping by product group', legend:[{label:'Cost of goods',color:cssVar('--s1')},{label:'Shipping',color:cssVar('--s2')}]});
+    table(c.tv,['Product','Cost of goods','Shipping','Fees','Net sales','Profit','Margin','Avg cost / unit'], g.map(x=>[x.key,money(x.cost),money(x.ship),money(x.fee),money(x.sales),money(x.profit),pct(x.margin),x.items?money(x.cost/x.items):'—'])); }
+
   /* Returns & cancellations */
   { const all=R.filter(r=>dimOK(r,true)&&inRange(r,P.range)); const can=all.filter(r=>r.sc==='canceled'), rma=all.filter(r=>r.sc==='rma'), ret=all.filter(r=>r.sc==='return'), loss=all.filter(r=>r.sc==='loss');
     const c=card(cards.returns,'Cancellations and returns', P.name);
@@ -598,7 +611,7 @@ function renderNotes(){
   const sec=(title, items)=>{ const d=H('div'); d.append(H('h3',null,title)); const ul=H('ul'); for(const it of items){ const li=H('li'); if (typeof it==='string') li.textContent=it; else li.append(...it); ul.append(li);} d.append(ul); return d; };
   const ex=DIAG, dt=DIAG;
   const a=H('a',null,'the Google Sheet'); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener';
-  n.append(sec('Where the numbers come from',[ [document.createTextNode('Tab “'+META.tab+'” of '), a, document.createTextNode(`, ${int(R.length)} invoice lines from ${fmtDate(minDate)} to ${fmtDate(maxDate)}${SOURCE.live?', read live from the sheet':', from the snapshot embedded in this page'}.`)], 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.', '“Purchases by supplier” sums the COSTO column (what the goods cost us) per FULFILLMENT supplier; SHIPPING is shown separately. Orders count distinct invoice numbers. “Products sold” sums the QTY column on wheel, tire, package and accessory lines (labor, shipping and fee lines are not products). “Wheels & tires sold” counts wheel, tire and package units only. Return lines with negative quantities reduce the totals.', 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.' ]));
+  n.append(sec('Where the numbers come from',[ [document.createTextNode('Tab “'+META.tab+'” of '), a, document.createTextNode(`, ${int(R.length)} invoice lines from ${fmtDate(minDate)} to ${fmtDate(maxDate)}${SOURCE.live?', read live from the sheet':', from the snapshot embedded in this page'}.`)], 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.', '“Purchases by supplier” and “What we paid” sum the COSTO column (what the goods cost us), the SHIPPING column (freight we paid) and the FEE column (marketplace and payment fees). Orders count distinct invoice numbers. “Products sold” sums the QTY column on wheel, tire, package and accessory lines (labor, shipping and fee lines are not products). “Wheels & tires sold” counts wheel, tire and package units only. Return lines with negative quantities reduce the totals.', 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.' ]));
   n.append(sec('What was left out or repaired',[ `Since 2023 a returned order appears as its original line relabeled CANCELED plus an RMA line with negative amounts. Both legs are kept, so they net to zero and match a plain SUMIF on the sheet (${int(ex['canceled paired with RMA (kept)']||0)} lines). A CANCELED line with nothing offsetting it (the 2021–2022 convention) is an order that never shipped and is excluded; those appear only in the cancellations panel. Rows marked TEST were dropped (${int(ex['skip: TEST rows']||0)} lines).`, 'RMA, returned and refunded lines stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.', `Month and year come from the MONTH and YEAR columns. ${int(dt['date swapped']||0)} DATE cells had day and month swapped and were repaired; ${int((dt['date mismatch']||0)+(dt['date missing']||0)+(dt['date clamped']||0))} unreadable dates were placed within their month.`, `${int(ex['skip: no MONTH (empty pre-filled rows)']||0)} empty pre-filled rows and ${int(ex['skip: no YEAR (summary rows)']||0)} summary rows at the bottom of the tab were skipped.` ]));
   n.append(sec('Keeping it current',[ 'The page reads the sheet directly every time it opens, every 10 minutes while it stays open, and when you press Refresh. New rows in the sheet show up on the next read.', 'If the sheet cannot be reached, the page falls back to the snapshot embedded when it was last built (python3 build.py in the project folder).', 'Filters are remembered in this browser only. Every chart has a Table view with the same numbers.' ]));
 }
