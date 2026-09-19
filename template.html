@@ -10,7 +10,7 @@
   --grid:#e6e6e6; --axis:#c8c8c8; --border:rgba(17,20,23,.10); --border-strong:rgba(17,20,23,.28);
   --s1:#dd1d1d; --s2:#111417; --s3:#8a9096; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
   --de:#cfd2d5; --de-line:#b4b8bc;
-  --o1:#f3b0b0; --o2:#dd1d1d; --o3:#7a0f0f;
+  --o1:#f6bcbc; --o2:#dd1d1d; --o3:#6e0b0b;
   --good:#0a7a2a; --bad:#9b1c1c;
   --chip-on-bg:#111417; --chip-on-fg:#ffffff;
   --brand:#ff0707; --brand-deep:#dd1d1d; --link:#c41616; --focus:#dd1d1d;
@@ -24,7 +24,7 @@
     --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --border-strong:rgba(255,255,255,.24);
     --s1:#f0433f; --s2:#e6e8ea; --s3:#8a9096; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
     --de:#3a3d41; --de-line:#55595e;
-    --o1:#f3b0b0; --o2:#f0433f; --o3:#9c1a1a;
+    --o1:#ffd1d1; --o2:#f0433f; --o3:#7d1010;
     --good:#3ec46a; --bad:#ff8a86;
     --chip-on-bg:#ffffff; --chip-on-fg:#0b0b0b;
     --brand:#ff2a26; --brand-deep:#dd1d1d; --link:#ff8a86; --focus:#ff5f5c;
@@ -38,7 +38,7 @@
   --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --border-strong:rgba(255,255,255,.24);
   --s1:#f0433f; --s2:#e6e8ea; --s3:#8a9096; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
   --de:#3a3d41; --de-line:#55595e;
-  --o1:#f3b0b0; --o2:#f0433f; --o3:#9c1a1a;
+  --o1:#ffd1d1; --o2:#f0433f; --o3:#7d1010;
   --good:#3ec46a; --bad:#ff8a86;
   --chip-on-bg:#ffffff; --chip-on-fg:#0b0b0b;
   --brand:#ff2a26; --brand-deep:#dd1d1d; --link:#ff8a86; --focus:#ff5f5c;
@@ -685,6 +685,6 @@ function renderNotes(){
 { const {rows,diag}=cleanCSV(SNAPSHOT_CSV); setData(rows, diag, {live:false, at:null, error:null, loading:false}); }
 refreshLive();
 let raf=0; const ro=new ResizeObserver(()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ const w=vizWidth(cards.trend); if (Math.abs(w-W)>4) renderAll(); }); }); ro.observe(cards.trend);
-document.addEventListener('scroll',hideTip,{passive:true});
+document.addEventListener('scroll',()=>{ hideTip(); document.querySelectorAll('.xh').forEach(l=>l.setAttribute('visibility','hidden')); },{passive:true});
 })();
 </script>
