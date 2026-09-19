@@ -17,6 +17,12 @@ are unreadable. The password lives in `.env` as `DASH_PASSWORD` (never
 committed) and in the repo's Actions secrets. To change it, update both and
 rebuild; anyone who ticked "Remember this device" is signed out automatically.
 
+**Languages:** the dashboard, login page and `manual.html` switch between English
+and Spanish (EN / ES buttons); the choice is remembered per browser.
+
+**User guide:** `manual.html` is a plain-language manual for staff, served next to
+the dashboard and linked from the header and the login page.
+
 ## Refresh the fallback snapshot
 
     python3 build.py
@@ -33,6 +39,7 @@ does this nightly so the fallback never gets stale.
   JavaScript (TEST rows dropped, canceled orders separated, day/month-swapped
   dates repaired, product types grouped). Edit this file, then rebuild.
 - `login.html` — the password screen; `build.py` injects the encrypted payload.
+- `manual.html` — bilingual user guide (static, not encrypted, no data).
 - `build.py` — downloads the CSV, renders, encrypts.
 - `assets/logo.png` — Wheels Below Retail logo, embedded into both pages.
 - `index.html` — generated, encrypted output. Do not edit by hand.

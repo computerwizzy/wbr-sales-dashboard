@@ -85,6 +85,9 @@ button{font:inherit;color:inherit}
 .reset{height:40px;border:1px solid var(--chip-on-bg);background:var(--surface);color:var(--ink);border-radius:4px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer;padding:0 14px}
 .reset:hover{border-color:var(--brand-deep);color:var(--brand-deep)}
 .hdr .reset{height:auto;border:0;background:none;color:var(--link);padding:0 6px;font-weight:600}
+.langs{display:inline-flex;border:1px solid var(--border-strong);border-radius:4px;overflow:hidden;vertical-align:middle}
+.langbtn{border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:12px;font-weight:700;padding:2px 8px;cursor:pointer;letter-spacing:.04em}
+.langbtn[aria-pressed="true"]{background:var(--brand);color:#fff}
 @media (max-width:560px){ .frow select,.frow input[type=date]{width:100%} .frow .fgroup:not(.grow){flex:1 1 40%} .reset{width:100%} }
 
 /* kpis */
@@ -174,27 +177,27 @@ tr:hover td{background:var(--surface-2)}
 </style>
 
 <div class="band"><header class="hdr">
-  <div class="brand"><img class="logo" src="__LOGO__" alt="Wheels Below Retail" width="200" height="103"><h1>Sales dashboard<small id="subtitle">Net sales and gross profit from the invoice ledger</small></h1></div>
+  <div class="brand"><img class="logo" src="__LOGO__" alt="Wheels Below Retail" width="200" height="103"><h1><span data-t="Sales dashboard">Sales dashboard</span><small id="subtitle">Net sales and gross profit from the invoice ledger</small></h1></div>
   <div class="meta" id="hdrmeta"></div>
 </header></div>
 <div class="wrap">
 
   <section class="fbar" aria-label="Filters">
     <div class="frow">
-      <div class="fgroup grow"><span class="flab">Period</span><div class="chips" id="periodChips"></div></div>
-      <div class="fgroup"><label class="flab" for="fMonth">Month</label><select id="fMonth"></select></div>
-      <div class="fgroup"><label class="flab" for="fFrom">From</label><input type="date" id="fFrom"></div>
-      <div class="fgroup"><label class="flab" for="fTo">To</label><input type="date" id="fTo"></div>
-      <div class="fgroup"><span class="flab" aria-hidden="true">&nbsp;</span><button class="reset" id="reset" type="button">Reset filters</button></div>
+      <div class="fgroup grow"><span class="flab" data-t="Period">Period</span><div class="chips" id="periodChips"></div></div>
+      <div class="fgroup"><label class="flab" data-t="Month" for="fMonth">Month</label><select id="fMonth"></select></div>
+      <div class="fgroup"><label class="flab" data-t="From" for="fFrom">From</label><input type="date" id="fFrom"></div>
+      <div class="fgroup"><label class="flab" data-t="To" for="fTo">To</label><input type="date" id="fTo"></div>
+      <div class="fgroup"><span class="flab" aria-hidden="true">&nbsp;</span><button class="reset" id="reset" type="button" data-t="Reset filters">Reset filters</button></div>
     </div>
     <div class="fgrid">
-      <div class="fgroup"><label class="flab" for="fChannel">Channel</label><select id="fChannel"></select></div>
-      <div class="fgroup"><label class="flab" for="fGroup">Product</label><select id="fGroup"></select></div>
-      <div class="fgroup"><label class="flab" for="fType">Type</label><select id="fType"></select></div>
-      <div class="fgroup"><label class="flab" for="fSupplier">Supplier</label><select id="fSupplier"></select></div>
-      <div class="fgroup"><label class="flab" for="fSeller">Seller</label><select id="fSeller"></select></div>
-      <div class="fgroup"><label class="flab" for="fPay">Payment</label><select id="fPay"></select></div>
-      <div class="fgroup"><label class="flab" for="fStatus">Status</label><select id="fStatus"></select></div>
+      <div class="fgroup"><label class="flab" data-t="Channel" for="fChannel">Channel</label><select id="fChannel"></select></div>
+      <div class="fgroup"><label class="flab" data-t="Product" for="fGroup">Product</label><select id="fGroup"></select></div>
+      <div class="fgroup"><label class="flab" data-t="Type" for="fType">Type</label><select id="fType"></select></div>
+      <div class="fgroup"><label class="flab" data-t="Supplier" for="fSupplier">Supplier</label><select id="fSupplier"></select></div>
+      <div class="fgroup"><label class="flab" data-t="Seller" for="fSeller">Seller</label><select id="fSeller"></select></div>
+      <div class="fgroup"><label class="flab" data-t="Payment" for="fPay">Payment</label><select id="fPay"></select></div>
+      <div class="fgroup"><label class="flab" data-t="Status" for="fStatus">Status</label><select id="fStatus"></select></div>
     </div>
   </section>
 
@@ -276,24 +279,62 @@ let R=[], DIAG={}, maxDate='', minDate='', curYear=0, years=[], PERIODS=[], SOUR
 const isSale = r => r.sc==='ok' || r.sc==='rma' || r.sc==='return';
 const UNIT_GROUPS = new Set(['Wheels','New tires','Used tires','Packages']);
 const PRODUCT_GROUPS = new Set(['Wheels','New tires','Used tires','Packages','Accessories']);
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_EN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], MONTHS_FULL_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_ES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'], MONTHS_FULL_ES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let MONTHS=MONTHS_EN, MONTHS_FULL=MONTHS_FULL_EN;
+/* ---------- language ---------- */
+let LANG='en'; try{ LANG=localStorage.getItem('wbr-lang') || ((navigator.language||'').toLowerCase().startsWith('es')?'es':'en'); }catch(e){}
+const ES={
+ 'Sales dashboard':'Tablero de ventas','User guide':'Manual de uso','Table':'Tabla','Chart':'Gráfica','Refresh':'Actualizar','Reset filters':'Limpiar filtros',
+ 'Period':'Periodo','Month':'Mes','From':'Desde','To':'Hasta','Channel':'Canal','Product':'Producto','Type':'Tipo','Supplier':'Proveedor','Seller':'Vendedor','Payment':'Pago','Status':'Estatus',
+ 'All time':'Todo el historial','YTD':'a la fecha','Last 12 months':'Últimos 12 meses','Custom dates':'Fechas personalizadas','Full year':'Año completo','Whole year':'Año completo','Pick a year first':'Elige un año primero','Choose a year above to pick a month':'Elige un año arriba para poder elegir un mes',
+ 'vs':'vs','vs prior 12 months':'vs 12 meses anteriores','vs same dates a year earlier':'vs mismas fechas del año anterior','pts':'pts','no comparable prior period':'sin periodo anterior comparable','all recorded sales':'todas las ventas registradas','no prior year in the ledger':'no hay año anterior en el registro',
+ 'All channels':'Todos los canales','All products':'Todos los productos','All types':'Todos los tipos','All suppliers':'Todos los proveedores','All sellers':'Todos los vendedores','All payment methods':'Todos los métodos de pago','Sold + returns':'Vendidos + devoluciones','Clean sales only':'Solo ventas limpias','RMA only (order + reversal)':'Solo RMA (pedido + reverso)','Returns & refunds only':'Solo devoluciones y reembolsos',
+ 'Net sales':'Ventas netas','Gross profit':'Utilidad bruta','Profit margin':'Margen de utilidad','Orders':'Pedidos','Products sold':'Productos vendidos','Wheels & tires sold':'Rines y llantas vendidos','Avg order value':'Ticket promedio',
+ 'Monthly net sales and gross profit':'Ventas netas y utilidad bruta por mes','{m} net sales and gross profit, by year':'Ventas netas y utilidad bruta de {m}, por año','{m} of every year':'{m} de cada año','Net sales by month, year over year':'Ventas netas por mes, año contra año','All years':'Todos los años','{y} highlighted':'{y} resaltado','Other years':'Otros años','No data':'Sin datos',
+ 'Sales channel':'Canal de venta','Product mix':'Mezcla de productos','Units sold by product':'Unidades vendidas por producto','{p} products + {l} labor & charges = {q} in the QTY column':'{p} productos + {l} mano de obra y cargos = {q} en la columna QTY','Labor & services':'Mano de obra y servicios','Mount & balance, paint, drilling':'Montaje y balanceo, pintura, barrenado','Sales by payment method':'Ventas por método de pago','Grouped from the PAYMENT TYPE column':'Agrupado desde la columna PAYMENT TYPE','Sales by seller':'Ventas por vendedor','Seller column of the ledger':'Columna SELLER del registro','Purchases by supplier':'Compras por proveedor','{m} spent on goods':'{m} gastados en mercancía','Other ({n} suppliers)':'Otros ({n} proveedores)','What we paid':'Lo que pagamos','Cost of goods, shipping and fees':'Costo de mercancía, envío y comisiones','Cancellations and returns':'Cancelaciones y devoluciones','Invoice lines':'Líneas de factura',
+ 'Wheels':'Rines','New tires':'Llantas nuevas','Used tires':'Llantas usadas','Packages':'Paquetes','Accessories':'Accesorios','Labor':'Mano de obra','Other':'Otros','Card':'Tarjeta','Financing':'Financiamiento','Cash / wire':'Efectivo / transferencia','Not recorded':'Sin registrar','Products':'Productos','Labor & charges (not products)':'Mano de obra y cargos (no son productos)',' (not a product)':' (no es producto)',
+ 'Margin':'Margen','Profit':'Utilidad','Share':'Participación','Share of sales':'% de las ventas','Share of purchases':'% de las compras','Share of all quantities':'% de todas las cantidades','Units':'Unidades','Units sold':'Unidades vendidas','Quantity':'Cantidad','Quantity on lines':'Cantidad en líneas','Qty':'Cant.','Date':'Fecha','Invoice':'Factura','Service':'Servicio','Line type':'Tipo de línea','Payment method':'Método de pago','Revenue':'Ingresos','Fees':'Comisiones','Fees %':'% comisiones','Fees as % of sales':'Comisiones como % de ventas','Shipping':'Envío','Shipping paid':'Envío pagado','Cost of goods':'Costo de mercancía','Purchases':'Compras','Purchases (cost of goods)':'Compras (costo de mercancía)','Net sales generated':'Ventas netas generadas','Marketplace & payment fees':'Comisiones de plataformas y pagos','Avg price per unit':'Precio promedio por unidad','Avg cost per unit':'Costo promedio por unidad','Avg per unit':'Promedio por unidad','Avg cost / unit':'Costo prom. / unidad',
+ 'Labor units':'Unidades de mano de obra','{n} orders':'{n} pedidos','Labor revenue':'Ingresos por mano de obra','{p} of net sales':'{p} de las ventas netas','Labor profit':'Utilidad de mano de obra','{p} margin':'{p} de margen',
+ 'Canceled':'Cancelados','RMA':'RMA','Returned / refunded':'Devueltos / reembolsados','Returns & refunds':'Devoluciones y reembolsos','{m} not sold':'{m} no vendidos','{m} returned':'{m} devueltos','{m} return cost':'{m} de costo de devolución',
+ 'Mount & Balance':'Montaje y balanceo','Custom Paint':'Pintura personalizada','Caps':'Tapas','Drilling':'Barrenado','Swap':'Cambio','Mount & Balanced Labor':'Montaje y balanceo',
+ 'Sold':'Vendido','RMA · original':'RMA · original','RMA · reversal':'RMA · reverso','REFUND':'REEMBOLSO','RETURN':'DEVOLUCIÓN','Search product, invoice, supplier, payment…':'Buscar producto, factura, proveedor, pago…','{n} lines · newest first · canceled orders excluded':'{n} líneas · más recientes primero · sin pedidos cancelados','Show 40 more ({n} left)':'Mostrar 40 más (faltan {n})',
+ 'No sales match these filters':'No hay ventas con estos filtros','No cancellations or returns in this period':'No hay cancelaciones ni devoluciones en este periodo',
+ 'Data through ':'Datos hasta el ','Reading the sheet…':'Leyendo la hoja…','Live · read {t}':'En vivo · leído {t}','Snapshot from {d}':'Copia del {d}','Live read failed: {e}. ':'Falló la lectura en vivo: {e}. ','Open the Google Sheet':'Abrir la hoja de Google','timed out':'se agotó el tiempo de espera','the browser blocked the request (offline, a strict sandbox, or the sheet is no longer shared)':'el navegador bloqueó la solicitud (sin conexión, un entorno restringido o la hoja ya no está compartida)','the sheet came back nearly empty':'la hoja llegó casi vacía','Google answered HTTP {s}':'Google respondió HTTP {s}',
+ 'Where the numbers come from':'De dónde salen los números','Tab “{tab}” of ':'Pestaña “{tab}” de ','the Google Sheet':'la hoja de Google',', {n} invoice lines from {a} to {b}{src}.':', {n} líneas de factura del {a} al {b}{src}.',', read live from the sheet':', leídas en vivo desde la hoja',', from the snapshot embedded in this page':', desde la copia guardada en esta página',
+ 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.':'Ventas netas es la columna VENTA (antes de impuestos). Utilidad bruta es la columna PROFIT, que ya descuenta costo, envío, comisiones y costos de devolución. Margen es utilidad entre ventas netas.',
+ '“Purchases by supplier” and “What we paid” sum the COSTO column (what the goods cost us), the SHIPPING column (freight we paid) and the FEE column (marketplace and payment fees). Orders count distinct invoice numbers. “Products sold” counts wheel, tire, package and accessory units. Labor (mount and balance is entered per wheel) and charge lines also carry quantities, so a plain sum of the QTY column on the sheet is higher; the “Labor & services” card shows those separately and the “Units sold by product” card reconciles the two. “Wheels & tires sold” counts wheel, tire and package units only. Return lines with negative quantities reduce the totals.':'“Compras por proveedor” y “Lo que pagamos” suman la columna COSTO (lo que nos costó la mercancía), la columna SHIPPING (fletes pagados) y la columna FEE (comisiones de plataformas y pagos). Pedidos cuenta números de factura distintos. “Productos vendidos” cuenta unidades de rines, llantas, paquetes y accesorios. Las líneas de mano de obra (montaje y balanceo se captura por rin) y de cargos también llevan cantidad, por eso una suma simple de la columna QTY en la hoja da más; la tarjeta “Mano de obra y servicios” las muestra aparte y “Unidades vendidas por producto” cuadra ambas cifras. “Rines y llantas vendidos” cuenta solo rines, llantas y paquetes. Las líneas de devolución con cantidad negativa restan.',
+ 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.':'Las comparaciones “a la fecha” usan la misma ventana de calendario del año anterior, terminando en la fecha de la última factura.',
+ 'What was left out or repaired':'Qué se excluyó o se corrigió',
+ 'Since 2023 a returned order appears as its original line relabeled CANCELED plus an RMA line with negative amounts. Both legs are kept, so they net to zero and match a plain SUMIF on the sheet ({n} lines). A CANCELED line with nothing offsetting it (the 2021–2022 convention) is an order that never shipped and is excluded; those appear only in the cancellations panel. Rows marked TEST were dropped ({t} lines).':'Desde 2023 un pedido devuelto aparece como su línea original marcada CANCELED más una línea RMA con montos negativos. Se conservan ambas, así se anulan entre sí y cuadran con un SUMIF simple en la hoja ({n} líneas). Una línea CANCELED sin nada que la compense (la forma de 2021–2022) es un pedido que nunca se envió y se excluye; solo aparece en el panel de cancelaciones. Las filas marcadas TEST se descartaron ({t} líneas).',
+ 'RMA, returned and refunded lines stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.':'Las líneas RMA, devueltas y reembolsadas se quedan en ventas, porque su PROFIT ya refleja la devolución; van marcadas en la tabla de facturas.',
+ 'Month and year come from the MONTH and YEAR columns. {s} DATE cells had day and month swapped and were repaired; {u} unreadable dates were placed within their month.':'El mes y el año salen de las columnas MONTH y YEAR. {s} celdas DATE tenían el día y el mes invertidos y se corrigieron; {u} fechas ilegibles se ubicaron dentro de su mes.',
+ '{e} empty pre-filled rows and {s} summary rows at the bottom of the tab were skipped.':'Se omitieron {e} filas vacías prellenadas y {s} filas de totales al final de la pestaña.',
+ 'Keeping it current':'Cómo se mantiene al día',
+ 'The page reads the sheet directly every time it opens, every 10 minutes while it stays open, and when you press Refresh. New rows in the sheet show up on the next read.':'La página lee la hoja directamente cada vez que se abre, cada 10 minutos mientras esté abierta y cuando pulsas Actualizar. Las filas nuevas de la hoja aparecen en la siguiente lectura.',
+ 'If the sheet cannot be reached, the page falls back to the snapshot embedded when it was last built (python3 build.py in the project folder).':'Si no se puede leer la hoja, la página usa la copia guardada la última vez que se generó (python3 build.py en la carpeta del proyecto).',
+ 'Filters are remembered in this browser only. Every chart has a Table view with the same numbers.':'Los filtros se recuerdan solo en este navegador. Cada gráfica tiene una vista de Tabla con los mismos números.'
+};
+function t(key, vars){ let out = (LANG==='es' && ES[key]!=null) ? ES[key] : key; if(vars) for(const k in vars) out=out.split('{'+k+'}').join(String(vars[k])); return out; }
+function applyLang(){ MONTHS = LANG==='es'?MONTHS_ES:MONTHS_EN; MONTHS_FULL = LANG==='es'?MONTHS_FULL_ES:MONTHS_FULL_EN; document.documentElement.lang=LANG; document.querySelectorAll('[data-t]').forEach(el=>{ el.textContent=t(el.dataset.t); }); }
+function setLang(l){ LANG=l; try{ localStorage.setItem('wbr-lang', l); }catch(e){} applyLang(); PERIODS=buildPeriods(); renderFilters(); renderAll(); }
+applyLang();
 const CH_SLOT = {Shopify:1, eBay:2, Amazon:3};
 const GROUP_ORDER = ['Wheels','New tires','Used tires','Packages','Accessories','Labor','Other'];
 
 /* ---------- periods ---------- */
 function addMonths(iso, n){ const y=+iso.slice(0,4), m=+iso.slice(5,7)-1+n, d=+iso.slice(8,10); const dt=new Date(Date.UTC(y+Math.floor(m/12), ((m%12)+12)%12, 1)); const last=new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth()+1, 0)).getUTCDate(); dt.setUTCDate(Math.min(d,last)); return dt.toISOString().slice(0,10); }
 function addDays(iso, n){ const dt=new Date(iso+'T00:00:00Z'); dt.setUTCDate(dt.getUTCDate()+n); return dt.toISOString().slice(0,10); }
-function fmtDate(iso){ const [y,m,d]=iso.split('-'); return `${MONTHS[+m-1]} ${+d}, ${y}`; }
+function fmtDate(iso){ const [y,m,d]=iso.split('-'); return LANG==='es' ? `${+d} ${MONTHS[+m-1]} ${y}` : `${MONTHS[+m-1]} ${+d}, ${y}`; }
 function buildPeriods(){
   const P=[];
-  P.push({id:'all', label:'All time', range:[minDate,maxDate], cmp:null, name:`${fmtDate(minDate)} – ${fmtDate(maxDate)}`});
+  P.push({id:'all', label:t('All time'), range:[minDate,maxDate], cmp:null, name:`${fmtDate(minDate)} – ${fmtDate(maxDate)}`});
   for (const y of [...years].reverse()){
-    if (y===curYear){ const cmpEnd=`${y-1}${maxDate.slice(4)}`; P.push({id:String(y), label:`${y} YTD`, range:[`${y}-01-01`, maxDate], cmp: years.includes(y-1)?[`${y-1}-01-01`, cmpEnd]:null, cmpLabel:`vs ${y-1} YTD`, name:`Jan 1 – ${fmtDate(maxDate)}`}); }
-    else { P.push({id:String(y), label:String(y), range:[`${y}-01-01`,`${y}-12-31`], cmp: years.includes(y-1)?[`${y-1}-01-01`,`${y-1}-12-31`]:null, cmpLabel:`vs ${y-1}`, name:`Full year ${y}`}); }
+    if (y===curYear){ const cmpEnd=`${y-1}${maxDate.slice(4)}`; P.push({id:String(y), label:`${y} ${t('YTD')}`, range:[`${y}-01-01`, maxDate], cmp: years.includes(y-1)?[`${y-1}-01-01`, cmpEnd]:null, cmpLabel:`${t('vs')} ${y-1} ${t('YTD')}`, name:`${fmtDate(`${y}-01-01`)} – ${fmtDate(maxDate)}`}); }
+    else { P.push({id:String(y), label:String(y), range:[`${y}-01-01`,`${y}-12-31`], cmp: years.includes(y-1)?[`${y-1}-01-01`,`${y-1}-12-31`]:null, cmpLabel:`${t('vs')} ${y-1}`, name:`${t('Full year')} ${y}`}); }
   }
   const l12start=addDays(addMonths(maxDate,-12),1);
-  P.push({id:'l12', label:'Last 12 months', range:[l12start,maxDate], cmp:[addMonths(l12start,-12), addDays(l12start,-1)], cmpLabel:'vs prior 12 months', name:`${fmtDate(l12start)} – ${fmtDate(maxDate)}`});
+  P.push({id:'l12', label:t('Last 12 months'), range:[l12start,maxDate], cmp:[addMonths(l12start,-12), addDays(l12start,-1)], cmpLabel:t('vs prior 12 months'), name:`${fmtDate(l12start)} – ${fmtDate(maxDate)}`});
   return P;
 }
 function setData(rows, diag, src){
@@ -309,13 +350,13 @@ const f = {period:null, month:0, channel:'all', group:'all', type:'all', seller:
 const STATUS_LABEL={ok:'Clean sales only', rma:'RMA only (order + reversal)', return:'Returns & refunds only'};
 try{ Object.assign(f, JSON.parse(localStorage.getItem('wbr-filters')||'{}')); }catch(e){}
 function saveState(){ try{ localStorage.setItem('wbr-filters', JSON.stringify(f)); }catch(e){} }
-function customPeriod(){ const a=f.from<=f.to?f.from:f.to, b=f.from<=f.to?f.to:f.from; const y=iso=>String(+iso.slice(0,4)-1)+iso.slice(4); return {id:'custom', label:'Custom dates', range:[a,b], cmp:[y(a),y(b)], cmpLabel:'vs same dates a year earlier', name:`${fmtDate(a)} – ${fmtDate(b)}`}; }
+function customPeriod(){ const a=f.from<=f.to?f.from:f.to, b=f.from<=f.to?f.to:f.from; const y=iso=>String(+iso.slice(0,4)-1)+iso.slice(4); return {id:'custom', label:t('Custom dates'), range:[a,b], cmp:[y(a),y(b)], cmpLabel:t('vs same dates a year earlier'), name:`${fmtDate(a)} – ${fmtDate(b)}`}; }
 const isYearPeriod = () => /^\d{4}$/.test(f.period);
 function period(){ const base=(f.period==='custom' && f.from && f.to) ? customPeriod() : PERIODS.find(p=>p.id===f.period); if(!f.month || !isYearPeriod()) return base;
   const Y=+base.id, mm=String(f.month).padStart(2,'0'), mn=MONTHS_FULL[f.month-1]; const lastDay=new Date(Date.UTC(Y, f.month, 0)).getUTCDate();
   let end=`${Y}-${mm}-${String(lastDay).padStart(2,'0')}`; if(end>maxDate) end=maxDate; const start=`${Y}-${mm}-01`;
-  const P={...base, id:base.id, range:[start,end], name: end<`${Y}-${mm}-${String(lastDay).padStart(2,'0')}` ? `${MONTHS[f.month-1]} 1 – ${fmtDate(end)}` : `${mn} ${Y}`};
-  if(base.cmp){ P.cmp=[`${Y-1}-${mm}-01`, `${Y-1}${end.slice(4)}`]; P.cmpLabel=`vs ${mn} ${Y-1}`; }
+  const P={...base, id:base.id, range:[start,end], name: end<`${Y}-${mm}-${String(lastDay).padStart(2,'0')}` ? `${fmtDate(start)} – ${fmtDate(end)}` : `${mn} ${Y}`};
+  if(base.cmp){ P.cmp=[`${Y-1}-${mm}-01`, `${Y-1}${end.slice(4)}`]; P.cmpLabel=`${t('vs')} ${mn} ${Y-1}`; }
   return P; }
 function dimOK(r, ignoreStatus){ return (f.channel==='all'||r.ch===f.channel) && (f.group==='all'||r.grp===f.group) && (f.type==='all'||r.type===f.type) && (f.seller==='all'||r.seller===f.seller) && (f.supplier==='all'||r.ful===f.supplier) && (f.pay==='all'||r.payg===f.pay) && (ignoreStatus || f.status==='all' || r.sc===f.status); }
 const inRange = (r,rg) => !rg || (r.d>=rg[0] && r.d<=rg[1]);
@@ -338,7 +379,7 @@ function truncate(s, max){ return s.length>max ? s.slice(0, Math.max(1,max-1)).t
 const tip = document.getElementById('tip');
 function showTip(evt, title, rows){
   tip.replaceChildren(); tip.append(H('div','t',title));
-  for (const [name,val,color] of rows){ const r=H('div','r'); const n=H('span','n'); if(color){ const i=document.createElement('i'); i.style.borderColor=color; n.append(i);} n.append(document.createTextNode(name)); r.append(n, H('span','v',val)); tip.append(r); }
+  for (const [name,val,color] of rows){ const r=H('div','r'); const n=H('span','n'); if(color){ const i=document.createElement('i'); i.style.borderColor=color; n.append(i);} n.append(document.createTextNode(t(name))); r.append(n, H('span','v',val)); tip.append(r); }
   tip.hidden=false; moveTip(evt);
 }
 function moveTip(evt){ const pad=14, w=tip.offsetWidth, h=tip.offsetHeight; let x=evt.pageX+pad, y=evt.pageY+pad; const maxX=document.documentElement.scrollWidth-w-8; if (x>maxX) x=evt.pageX-w-pad; if (y+h>window.scrollY+window.innerHeight-8) y=evt.pageY-h-pad; tip.style.left=x+'px'; tip.style.top=y+'px'; }
@@ -353,19 +394,19 @@ function groupBy(rows, key){ const m=new Map(); for(const r of rows){ const k=ke
 /* ---------- card scaffold ---------- */
 function card(el, title, sub){
   el.replaceChildren();
-  const h=H('div','card-h'); const left=H('div'); left.append(H('h2',null,title)); if(sub) left.append(H('div','sub',sub));
-  const btn=H('button','tbtn','Table'); btn.type='button'; btn.setAttribute('aria-pressed','false');
+  const h=H('div','card-h'); const left=H('div'); left.append(H('h2',null,t(title))); if(sub) left.append(H('div','sub',sub));
+  const btn=H('button','tbtn',t('Table')); btn.type='button'; btn.setAttribute('aria-pressed','false');
   h.append(left, btn); el.append(h);
   const viz=H('div','viz'); const tv=H('div','tv'); tv.hidden=true; el.append(viz, tv);
-  btn.addEventListener('click',()=>{ const on=btn.getAttribute('aria-pressed')!=='true'; btn.setAttribute('aria-pressed',String(on)); btn.textContent=on?'Chart':'Table'; viz.hidden=on; tv.hidden=!on; });
+  btn.addEventListener('click',()=>{ const on=btn.getAttribute('aria-pressed')!=='true'; btn.setAttribute('aria-pressed',String(on)); btn.textContent=on?t('Chart'):t('Table'); viz.hidden=on; tv.hidden=!on; });
   return {viz, tv, setSub:t=>{ left.querySelector('.sub').textContent=t; }};
 }
 function table(tv, headers, rows, numericFrom=1){
-  tv.replaceChildren(); const t=H('table'); const thead=H('thead'); const tr=H('tr');
-  headers.forEach((h,i)=>{ const th=H('th', i>=numericFrom?'n':null, h); tr.append(th); }); thead.append(tr);
-  const tb=H('tbody'); for(const r of rows){ const tr=H('tr'); r.forEach((c,i)=>{ const td=H('td', i>=numericFrom?'n':null, String(c)); if (typeof c==='string' && c.startsWith('-$')) td.classList.add('neg'); tr.append(td);}); tb.append(tr);} t.append(thead,tb); tv.append(t);
+  tv.replaceChildren(); const tbl=H('table'); const thead=H('thead'); const tr=H('tr');
+  headers.forEach((h,i)=>{ const th=H('th', i>=numericFrom?'n':null, t(h)); tr.append(th); }); thead.append(tr);
+  const tb=H('tbody'); for(const r of rows){ const tr=H('tr'); r.forEach((c,i)=>{ const td=H('td', i>=numericFrom?'n':null, t(String(c))); if (typeof c==='string' && c.startsWith('-$')) td.classList.add('neg'); tr.append(td);}); tb.append(tr);} tbl.append(thead,tb); tv.append(tbl);
 }
-function legend(items){ const l=H('div','legend'); for(const it of items){ const k=H('span','k'); const sw=H('span', it.line?'ln':'sw'); if(it.line) sw.style.borderTopColor=it.color; else sw.style.background=it.color; k.append(sw, document.createTextNode(it.label)); l.append(k);} return l; }
+function legend(items){ const l=H('div','legend'); for(const it of items){ const k=H('span','k'); const sw=H('span', it.line?'ln':'sw'); if(it.line) sw.style.borderTopColor=it.color; else sw.style.background=it.color; k.append(sw, document.createTextNode(t(it.label))); l.append(k);} return l; }
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 /* ---------- charts ---------- */
@@ -375,7 +416,7 @@ function columnChart(viz, W, months, series, opts){
   const n=months.length; const Hh=opts.height||270, padL=78, padR=12, padT=14, padB=32;
   const plotW=Math.max(60, W-padL-padR), plotH=Hh-padT-padB;
   const maxV=Math.max(0, ...series.flatMap(s=>s.values.filter(v=>v!=null)));
-  if (maxV<=0){ viz.append(H('div','empty','No sales match these filters')); return; }
+  if (maxV<=0){ viz.append(H('div','empty',t('No sales match these filters'))); return; }
   const {ticks, max}=niceTicks(maxV, 4);
   const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`, width:W, height:Hh, role:'img', 'aria-label':opts.aria||''});
   const yOf=v=> padT + plotH - (v/max)*plotH;
@@ -403,7 +444,7 @@ function yoyChart(viz, W, data, focus, prior){
   const Hh=270, padL=78, padR=48, padT=14, padB=32; const plotW=Math.max(60,W-padL-padR), plotH=Hh-padT-padB;
   const ys=Object.keys(data).map(Number).sort();
   const maxV=Math.max(0, ...ys.flatMap(y=>data[y].filter(v=>v!=null)));
-  if (maxV<=0){ viz.append(H('div','empty','No sales match these filters')); return; }
+  if (maxV<=0){ viz.append(H('div','empty',t('No sales match these filters'))); return; }
   const {ticks,max}=niceTicks(maxV,4);
   const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`, width:W, height:Hh, role:'img','aria-label':'Monthly net sales by year'});
   const yOf=v=>padT+plotH-(v/max)*plotH, xOf=i=>padL+(plotW/11)*i;
@@ -415,7 +456,7 @@ function yoyChart(viz, W, data, focus, prior){
   // crosshair
   const xh=S('line',{class:'xh',y1:padT,y2:padT+plotH,x1:0,x2:0,visibility:'hidden'}); svg.append(xh);
   const hit=S('rect',{x:padL-plotW/22,y:padT,width:plotW+plotW/11,height:plotH,class:'hit'});
-  hit.addEventListener('pointermove',e=>{ const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const p=pt.matrixTransform(svg.getScreenCTM().inverse()); const i=Math.max(0,Math.min(11,Math.round((p.x-padL)/(plotW/11)))); xh.setAttribute('x1',xOf(i)); xh.setAttribute('x2',xOf(i)); xh.setAttribute('visibility','visible'); const rows=[...ys].reverse().filter(y=>data[y][i]!=null).map(y=>[String(y), money(data[y][i],true), colorOf(y)]); showTip(e, MONTHS[i], rows.length?rows:[['No data','']]); });
+  hit.addEventListener('pointermove',e=>{ const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const p=pt.matrixTransform(svg.getScreenCTM().inverse()); const i=Math.max(0,Math.min(11,Math.round((p.x-padL)/(plotW/11)))); xh.setAttribute('x1',xOf(i)); xh.setAttribute('x2',xOf(i)); xh.setAttribute('visibility','visible'); const rows=[...ys].reverse().filter(y=>data[y][i]!=null).map(y=>[String(y), money(data[y][i],true), colorOf(y)]); showTip(e, MONTHS[i], rows.length?rows:[[t('No data'),'']]); });
   hit.addEventListener('pointerleave',()=>{ xh.setAttribute('visibility','hidden'); hideTip(); });
   svg.append(hit); viz.append(svg);
   viz.append(legend([{label:String(focus),color:cssVar('--s1'),line:true}, ...(prior&&data[prior]?[{label:String(prior),color:cssVar('--s2'),line:true}]:[]), ...(ys.some(y=>y!==focus&&y!==prior)?[{label:'Other years',color:cssVar('--de-line'),line:true}]:[])]));
@@ -424,14 +465,14 @@ function yoyChart(viz, W, data, focus, prior){
 function hbarChart(viz, W, items, opts){
   // items: [{label, value, cls?, tip:[[name,val]]}] single hue unless cls given
   viz.replaceChildren();
-  if (!items.length || Math.max(...items.map(i=>i.value))<=0){ viz.append(H('div','empty','No sales match these filters')); return; }
+  if (!items.length || Math.max(...items.map(i=>i.value))<=0){ viz.append(H('div','empty',t('No sales match these filters'))); return; }
   const rowH=33, padT=6, padB=6, labelW=Math.min(180, Math.max(104, W*0.28)), valW=Math.max(84, Math.min(110, W*0.22)), padR=10;
   const Hh=padT+padB+rowH*items.length; const x0=labelW+8, plotW=Math.max(40, W-x0-valW-padR);
   const max=Math.max(...items.map(i=>i.value));
   const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`,width:W,height:Hh,role:'img','aria-label':opts.aria||''});
   const maxChars=Math.floor(labelW/7.3);
   items.forEach((it,i)=>{ const y=padT+rowH*i+rowH/2; const w=Math.max(0,(it.value/max)*plotW); const bh=18; const r=Math.min(4,w); const d=w>0?`M${x0},${y-bh/2} H${x0+w-r} Q${x0+w},${y-bh/2} ${x0+w},${y-bh/2+r} V${y+bh/2-r} Q${x0+w},${y+bh/2} ${x0+w-r},${y+bh/2} H${x0} Z`:'';
-    const lab=S('text',{x:x0-8,y:y+4,'text-anchor':'end',class:'lbl'},truncate(it.label,maxChars)); lab.append(S('title',null,it.label)); svg.append(lab);
+    const lab=S('text',{x:x0-8,y:y+4,'text-anchor':'end',class:'lbl'},truncate(t(it.label),maxChars)); lab.append(S('title',null,t(it.label))); svg.append(lab);
     if(it.segs){ let sx=x0; it.segs.forEach((sg,si)=>{ const sw=Math.max(0,(sg.value/max)*plotW); if(sw<=0) return; const last=si===it.segs.length-1; const rr=last?Math.min(4,sw):0; const gap=si>0?2:0; const xa=sx+gap, wa=Math.max(0,sw-gap); const dd=`M${xa},${y-bh/2} H${xa+wa-rr} Q${xa+wa},${y-bh/2} ${xa+wa},${y-bh/2+rr} V${y+bh/2-rr} Q${xa+wa},${y+bh/2} ${xa+wa-rr},${y+bh/2} H${xa} Z`; svg.append(S('path',{d:dd,class:'bar '+sg.cls,'data-i':i})); sx+=sw; }); }
     else if(d) svg.append(S('path',{d,class:'bar '+(it.cls||'c1'),'data-i':i}));
     svg.append(S('text',{x:x0+w+6,y:y+4,class:'dl'},it.valueLabel||money(it.value)));
@@ -446,7 +487,7 @@ function stackedChart(viz, W, months, series, opts){
   viz.replaceChildren();
   const n=months.length, Hh=210, padL=40, padR=12, padT=10, padB=32; const plotW=Math.max(60,W-padL-padR), plotH=Hh-padT-padB;
   const totals=months.map((_,i)=>series.reduce((a,s)=>a+(s.values[i]||0),0)); const maxV=Math.max(0,...totals);
-  if (maxV<=0){ viz.append(H('div','empty','No cancellations or returns in this period')); return; }
+  if (maxV<=0){ viz.append(H('div','empty',t('No cancellations or returns in this period'))); return; }
   const {ticks,max}=niceTicks(maxV,3);
   const svg=S('svg',{viewBox:`0 0 ${W} ${Hh}`,width:W,height:Hh,role:'img','aria-label':opts.aria||''});
   const yOf=v=>padT+plotH-(v/max)*plotH; const slot=plotW/n, bw=Math.min(24,Math.max(2,slot-Math.max(2,slot*0.35))), xOf=i=>padL+slot*i+slot/2;
@@ -471,11 +512,11 @@ function vizWidth(el){ return Math.max(280, el.clientWidth-34); }
 function renderFilters(){
   const chips=$('periodChips'); chips.replaceChildren();
   for(const p of PERIODS){ const on=p.id===f.period; const b=H('button','chip', on && f.month && /^\d{4}$/.test(p.id) ? `${MONTHS[f.month-1]} ${p.id}` : p.label); b.type='button'; b.setAttribute('aria-pressed',String(on)); b.addEventListener('click',()=>{ f.period=p.id; f.from=''; f.to=''; saveState(); renderFilters(); renderAll(); }); chips.append(b); }
-  const cc=H('button','chip','Custom dates'); cc.type='button'; cc.hidden=f.period!=='custom'; cc.setAttribute('aria-pressed',String(f.period==='custom')); chips.append(cc);
+  const cc=H('button','chip',t('Custom dates')); cc.type='button'; cc.hidden=f.period!=='custom'; cc.setAttribute('aria-pressed',String(f.period==='custom')); chips.append(cc);
   const from=$('fFrom'), to=$('fTo'); from.min=to.min=minDate; from.max=to.max=maxDate; from.value=f.from||''; to.value=f.to||'';
   const onDate=()=>{ f.from=from.value; f.to=to.value; if(f.from&&f.to){ f.period='custom'; f.month=0; } else if(f.period==='custom') f.period=String(curYear); saveState(); renderFilters(); renderAll(); };
   from.onchange=onDate; to.onchange=onDate;
-  const fill=(sel,key,opts,allLabel)=>{ sel.replaceChildren(); const o=H('option',null,allLabel); o.value='all'; sel.append(o); for(const v of opts){ const [val,lab]=Array.isArray(v)?v:[v,v]; const oo=H('option',null,lab); oo.value=val; sel.append(oo);} if(![...sel.options].some(o=>o.value===f[key])) f[key]='all'; sel.value=f[key]; sel.onchange=()=>{ f[key]=sel.value; if(key==='group') f.type='all'; saveState(); renderFilters(); renderAll(); }; };
+  const fill=(sel,key,opts,allLabel)=>{ sel.replaceChildren(); const o=H('option',null,t(allLabel)); o.value='all'; sel.append(o); for(const v of opts){ const [val,lab]=Array.isArray(v)?v:[v,v]; const oo=H('option',null,t(lab)); oo.value=val; sel.append(oo);} if(![...sel.options].some(o=>o.value===f[key])) f[key]='all'; sel.value=f[key]; sel.onchange=()=>{ f[key]=sel.value; if(key==='group') f.type='all'; saveState(); renderFilters(); renderAll(); }; };
   const countDesc=arr=>{ const c=new Map(); for(const v of arr) c.set(v,(c.get(v)||0)+1); return [...c].sort((x,y)=>y[1]-x[1]||(x[0]<y[0]?-1:1)).map(x=>x[0]); };
   const sales=R.filter(isSale);
   const chans=[...new Set(sales.map(r=>r.ch))].sort((a,b)=>(CH_SLOT[a]||9)-(CH_SLOT[b]||9));
@@ -486,7 +527,7 @@ function renderFilters(){
   const pays=countDesc(R.map(r=>r.payg));
   fill($('fChannel'),'channel',chans,'All channels'); fill($('fGroup'),'group',groups,'All products'); fill($('fType'),'type',types,'All types'); fill($('fSupplier'),'supplier',sups,'All suppliers'); fill($('fSeller'),'seller',sellers,'All sellers'); fill($('fPay'),'pay',pays,'All payment methods');
   fill($('fStatus'),'status',Object.entries(STATUS_LABEL),'Sold + returns');
-  { const sel=$('fMonth'); sel.replaceChildren(); const yr=isYearPeriod(); if(!yr) f.month=0; const o=H('option',null, yr?'Whole year':'Pick a year first'); o.value='0'; sel.append(o); if(yr) MONTHS_FULL.forEach((m,i)=>{ const oo=H('option',null,m); oo.value=String(i+1); sel.append(oo); }); sel.value=String(f.month||0); sel.disabled=!yr; sel.title=yr?'':'Choose a year above to pick a month'; sel.onchange=()=>{ f.month=+sel.value; f.from=''; f.to=''; saveState(); renderFilters(); renderAll(); }; }
+  { const sel=$('fMonth'); sel.replaceChildren(); const yr=isYearPeriod(); if(!yr) f.month=0; const o=H('option',null, yr?t('Whole year'):t('Pick a year first')); o.value='0'; sel.append(o); if(yr) MONTHS_FULL.forEach((m,i)=>{ const oo=H('option',null,m); oo.value=String(i+1); sel.append(oo); }); sel.value=String(f.month||0); sel.disabled=!yr; sel.title=yr?'':t('Choose a year above to pick a month'); sel.onchange=()=>{ f.month=+sel.value; f.from=''; f.to=''; saveState(); renderFilters(); renderAll(); }; }
   $('reset').onclick=()=>{ Object.assign(f,{period:String(curYear), month:0, channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''}); saveState(); renderFilters(); renderAll(); };
 }
 
@@ -499,13 +540,13 @@ function renderAll(){
   const months = monthMode ? years.map(y=>`${y}-${mm2}`).filter(k=>k<=maxDate.slice(0,7)) : monthsBetween(P.range[0],P.range[1]);
   const mm=byMonth(trendRows,months);
   
-  const dimTxt=[f.channel!=='all'?f.channel:null, f.group!=='all'?f.group:null, f.type!=='all'?titleCase(f.type):null, f.supplier!=='all'?f.supplier:null, f.seller!=='all'?f.seller:null, f.pay!=='all'?f.pay:null, f.status!=='all'?STATUS_LABEL[f.status]:null].filter(Boolean).join(' · ');
+  const dimTxt=[f.channel!=='all'?f.channel:null, f.group!=='all'?f.group:null, f.type!=='all'?titleCase(f.type):null, f.supplier!=='all'?f.supplier:null, f.seller!=='all'?f.seller:null, f.pay!=='all'?f.pay:null, f.status!=='all'?t(STATUS_LABEL[f.status]):null].filter(Boolean).join(' · ');
   $('subtitle').textContent = `${P.name}${dimTxt?' · '+dimTxt:''}`;
   renderStatus();
 
   /* KPIs */
   const k=$('kpis'); k.replaceChildren();
-  const tile=(label, val, curV, prevV, spark, upGood=true, isPct=false)=>{ const t=H('div','kpi'); t.append(H('div','lbl',label)); t.append(H('div','val num-prop',val)); if(spark) t.append(spark); const d=H('div','dlt'); if(B && prevV!=null && isFinite(prevV) && prevV!==0 && isFinite(curV)){ const ch= isPct ? (curV-prevV) : (curV-prevV)/Math.abs(prevV); const b=H('b',null, isPct ? (ch>=0?'+':'−')+nf1.format(Math.abs(ch)*100)+' pts' : (ch>=0?'+':'−')+nf1.format(Math.abs(ch)*100)+'%'); b.classList.add((ch>=0)===upGood?'up':'down'); d.append(b, document.createTextNode(P.cmpLabel)); } else if (B){ d.append(document.createTextNode('no comparable prior period')); } else { d.append(document.createTextNode(P.id==='all'?'all recorded sales':'no prior year in the ledger')); } t.append(d); return t; };
+  const tile=(label, val, curV, prevV, spark, upGood=true, isPct=false)=>{ const el=H('div','kpi'); el.append(H('div','lbl',t(label))); el.append(H('div','val num-prop',val)); if(spark) el.append(spark); const d=H('div','dlt'); if(B && prevV!=null && isFinite(prevV) && prevV!==0 && isFinite(curV)){ const ch= isPct ? (curV-prevV) : (curV-prevV)/Math.abs(prevV); const b=H('b',null, isPct ? (ch>=0?'+':'−')+nf1.format(Math.abs(ch)*100)+' '+t('pts') : (ch>=0?'+':'−')+nf1.format(Math.abs(ch)*100)+'%'); b.classList.add((ch>=0)===upGood?'up':'down'); d.append(b, document.createTextNode(P.cmpLabel)); } else if (B){ d.append(document.createTextNode(t('no comparable prior period'))); } else { d.append(document.createTextNode(P.id==='all'?t('all recorded sales'):t('no prior year in the ledger'))); } el.append(d); return el; };
   const sp=mm.map(x=>x.sales);
   k.append(tile('Net sales', money(A.sales), A.sales, B?.sales, sparkline(sp)));
   k.append(tile('Gross profit', money(A.profit), A.profit, B?.profit, sparkline(mm.map(x=>x.profit))));
@@ -516,11 +557,11 @@ function renderAll(){
   k.append(tile('Avg order value', isFinite(A.aov)?money(A.aov,true):'—', A.aov, B?.aov, null));
 
   /* Trend */
-  { const c=card(cards.trend, monthMode?`${MONTHS_FULL[f.month-1]} net sales and gross profit, by year`:'Monthly net sales and gross profit', monthMode?`${MONTHS_FULL[f.month-1]} of every year${dimTxt?' · '+dimTxt:''}`:P.name); columnChart(c.viz, W, months, [ {name:'Net sales',cls:'c1',color:cssVar('--s1'),values:mm.map(x=>x.sales)}, {name:'Gross profit',cls:'l2',fillCls:'c2',color:cssVar('--s2'),values:mm.map(x=>x.profit),kind:'line'} ], {aria:'Monthly net sales bars with gross profit line', xLabel: monthMode ? (ym=>ym.slice(0,4)) : null, tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`, tipRows:i=>[['Net sales',money(mm[i].sales,true),cssVar('--s1')],['Gross profit',money(mm[i].profit,true),cssVar('--s2')],['Margin',pct(mm[i].sales?mm[i].profit/mm[i].sales:NaN)],['Orders',int(mm[i].n)],['Products sold',int(mm[i].items)]]}); table(c.tv,['Month','Net sales','Gross profit','Margin','Orders','Products sold'], mm.map(x=>[`${MONTHS[+x.ym.slice(5,7)-1]} ${x.ym.slice(0,4)}`, money(x.sales,true), money(x.profit,true), pct(x.sales?x.profit/x.sales:NaN), int(x.n), int(x.items)])); }
+  { const c=card(cards.trend, monthMode?t('{m} net sales and gross profit, by year',{m:MONTHS_FULL[f.month-1]}):'Monthly net sales and gross profit', monthMode?`${t('{m} of every year',{m:MONTHS_FULL[f.month-1]})}${dimTxt?' · '+dimTxt:''}`:P.name); columnChart(c.viz, W, months, [ {name:'Net sales',cls:'c1',color:cssVar('--s1'),values:mm.map(x=>x.sales)}, {name:'Gross profit',cls:'l2',fillCls:'c2',color:cssVar('--s2'),values:mm.map(x=>x.profit),kind:'line'} ], {aria:'Monthly net sales bars with gross profit line', xLabel: monthMode ? (ym=>ym.slice(0,4)) : null, tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`, tipRows:i=>[['Net sales',money(mm[i].sales,true),cssVar('--s1')],['Gross profit',money(mm[i].profit,true),cssVar('--s2')],['Margin',pct(mm[i].sales?mm[i].profit/mm[i].sales:NaN)],['Orders',int(mm[i].n)],['Products sold',int(mm[i].items)]]}); table(c.tv,['Month','Net sales','Gross profit','Margin','Orders','Products sold'], mm.map(x=>[`${MONTHS[+x.ym.slice(5,7)-1]} ${x.ym.slice(0,4)}`, money(x.sales,true), money(x.profit,true), pct(x.sales?x.profit/x.sales:NaN), int(x.n), int(x.items)])); }
 
   /* YoY */
   { const focus = /^\d{4}$/.test(P.id)? +P.id : curYear; const prior = years.includes(focus-1)? focus-1 : null; const data={}; const yoyRows=sales; for(const y of years){ const arr=Array(12).fill(null); const rs=yoyRows.filter(r=>r.y===y); for(const r of rs){ arr[r.m-1]=(arr[r.m-1]||0)+r.sales; } if (y===curYear){ const lastM=+maxDate.slice(5,7); for(let i=0;i<lastM;i++) if(arr[i]==null) arr[i]=0; } else { const first=Math.min(...rs.map(r=>r.m), 13); for(let i=first-1;i<12;i++) if(arr[i]==null) arr[i]=0; } data[y]=arr; }
-    const c=card(cards.yoy,'Net sales by month, year over year', `All years${dimTxt?' · '+dimTxt:''} · ${focus} highlighted`); yoyChart(c.viz, W, data, focus, prior); const hdr=['Month',...years.map(String)]; table(c.tv,hdr, MONTHS.map((m,i)=>[m,...years.map(y=>data[y][i]==null?'—':money(data[y][i],true))])); }
+    const c=card(cards.yoy,'Net sales by month, year over year', `${t('All years')}${dimTxt?' · '+dimTxt:''} · ${t('{y} highlighted',{y:focus})}`); yoyChart(c.viz, W, data, focus, prior); const hdr=['Month',...years.map(String)]; table(c.tv,hdr, MONTHS.map((m,i)=>[m,...years.map(y=>data[y][i]==null?'—':money(data[y][i],true))])); }
 
   /* Channel */
   { const g=groupBy(cur,r=>r.ch).sort((a,b)=>b.sales-a.sales); const c=card(cards.channel,'Sales channel', P.name); hbarChart(c.viz, vizWidth(cards.channel), g.map(x=>({label:x.key,value:x.sales,cls:'c'+(CH_SLOT[x.key]||8),tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Orders',int(x.n)],['Share of sales',pct(A.sales?x.sales/A.sales:NaN)]]})), {aria:'Net sales by channel', legend:g.map(x=>({label:x.key,color:cssVar('--s'+(CH_SLOT[x.key]||8))}))}); table(c.tv,['Channel','Net sales','Profit','Margin','Orders','Share'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n),pct(A.sales?x.sales/A.sales:NaN)])); }
@@ -530,41 +571,41 @@ function renderAll(){
 
   /* Units sold */
   { const g=groupBy(cur,r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)); g.forEach(x=>{ x.qty=x.rows.reduce((a,r)=>a+r.qty,0); x.isProd=PRODUCT_GROUPS.has(x.key); }); const total=g.reduce((a,x)=>a+x.qty,0), prod=g.filter(x=>x.isProd).reduce((a,x)=>a+x.qty,0);
-    const c=card(cards.units,'Units sold by product', `${int(prod)} products + ${int(total-prod)} labor & charges = ${int(total)} in the QTY column · ${P.name}`);
+    const c=card(cards.units,'Units sold by product', `${t('{p} products + {l} labor & charges = {q} in the QTY column',{p:int(prod),l:int(total-prod),q:int(total)})} · ${P.name}`);
     hbarChart(c.viz, vizWidth(cards.units), g.filter(x=>x.qty!==0).map(x=>({label:x.key,value:x.qty,valueLabel:int(x.qty),cls:x.isProd?'c1':'cde',tip:[[x.isProd?'Units sold':'Quantity on lines',int(x.qty)],['Net sales',money(x.sales)],['Avg price per unit',x.qty?money(x.sales/x.qty):'—'],['Share of all quantities',pct(total?x.qty/total:NaN)]]})), {aria:'Quantities by product group', legend:[{label:'Products',color:cssVar('--s1')},{label:'Labor & charges (not products)',color:cssVar('--de')}]});
-    table(c.tv,['Line type','Quantity','Net sales','Avg price per unit','Share'], g.map(x=>[x.key+(x.isProd?'':' (not a product)'),int(x.qty),money(x.sales),x.qty?money(x.sales/x.qty):'—',pct(total?x.qty/total:NaN)])); }
+    table(c.tv,['Line type','Quantity','Net sales','Avg price per unit','Share'], g.map(x=>[t(x.key)+(x.isProd?'':t(' (not a product)')),int(x.qty),money(x.sales),x.qty?money(x.sales/x.qty):'—',pct(total?x.qty/total:NaN)])); }
 
   /* Labor & services */
   { const lab=cur.filter(r=>r.grp==='Labor'); const LA=agg(lab); const g=groupBy(lab,r=>r.type).sort((a,b)=>b.sales-a.sales);
-    const c=card(cards.labor,'Labor & services', `Mount & balance, paint, drilling · ${P.name}`);
-    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',k),H('div','v',v),H('div','s',s)); return d; };
-    side.append(box('Labor units', int(LA.qty), int(LA.n)+' orders')); side.append(box('Labor revenue', money(LA.sales), pct(A.sales?LA.sales/A.sales:NaN)+' of net sales')); side.append(box('Labor profit', money(LA.profit), pct(LA.margin)+' margin'));
+    const c=card(cards.labor,'Labor & services', `${t('Mount & balance, paint, drilling')} · ${P.name}`);
+    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',t(k)),H('div','v',v),H('div','s',s)); return d; };
+    side.append(box('Labor units', int(LA.qty), t('{n} orders',{n:int(LA.n)}))); side.append(box('Labor revenue', money(LA.sales), t('{p} of net sales',{p:pct(A.sales?LA.sales/A.sales:NaN)}))); side.append(box('Labor profit', money(LA.profit), t('{p} margin',{p:pct(LA.margin)})));
     c.viz.append(side); const host=H('div'); c.viz.append(host);
     const nice=t=>titleCase((t.replace(/^LABOR\s*-\s*/,'')||'Labor').replace(/\bAND\b/g,'&'));
     hbarChart(host, vizWidth(cards.labor), g.map(x=>({label:nice(x.key),value:x.sales,tip:[['Revenue',money(x.sales)],['Units',int(x.qty)],['Profit',money(x.profit)],['Margin',pct(x.margin)],['Avg per unit',x.qty?money(x.sales/x.qty):'—'],['Orders',int(x.n)]]})), {aria:'Labor revenue by service type'});
     table(c.tv,['Service','Units','Revenue','Profit','Margin','Avg per unit','Orders'], g.map(x=>[nice(x.key),int(x.qty),money(x.sales),money(x.profit),pct(x.margin),x.qty?money(x.sales/x.qty):'—',int(x.n)])); }
 
   /* Payment methods */
-  { const g=groupBy(cur,r=>r.payg).sort((a,b)=>b.sales-a.sales); const c=card(cards.pay,'Sales by payment method', 'Grouped from the PAYMENT TYPE column · '+P.name);
+  { const g=groupBy(cur,r=>r.payg).sort((a,b)=>b.sales-a.sales); const c=card(cards.pay,'Sales by payment method', t('Grouped from the PAYMENT TYPE column')+' · '+P.name);
     hbarChart(c.viz, vizWidth(cards.pay), g.map(x=>({label:x.key,value:x.sales,cls:x.key==='Not recorded'||x.key==='Other'?'cde':'c1',tip:[['Net sales',money(x.sales)],['Share of sales',pct(A.sales?x.sales/A.sales:NaN)],['Fees',money(x.fee)],['Fees as % of sales',pct(x.sales?x.fee/x.sales:NaN)],['Orders',int(x.n)]]})), {aria:'Net sales by payment method'});
     table(c.tv,['Payment method','Net sales','Share','Fees','Fees %','Orders'], g.map(x=>[x.key,money(x.sales),pct(A.sales?x.sales/A.sales:NaN),money(x.fee),pct(x.sales?x.fee/x.sales:NaN),int(x.n)])); }
 
   /* Seller */
-  { const g=groupBy(cur,r=>r.seller||'Not recorded').sort((a,b)=>b.sales-a.sales); const c=card(cards.seller,'Sales by seller', 'Seller column of the ledger · '+P.name); hbarChart(c.viz, vizWidth(cards.seller), g.map(x=>({label:x.key,value:x.sales,cls:x.key==='Not recorded'?'cde':'c1',tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Orders',int(x.n)]]})), {aria:'Net sales by seller'}); table(c.tv,['Seller','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n)])); }
+  { const g=groupBy(cur,r=>r.seller||'Not recorded').sort((a,b)=>b.sales-a.sales); const c=card(cards.seller,'Sales by seller', t('Seller column of the ledger')+' · '+P.name); hbarChart(c.viz, vizWidth(cards.seller), g.map(x=>({label:x.key,value:x.sales,cls:x.key==='Not recorded'?'cde':'c1',tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Orders',int(x.n)]]})), {aria:'Net sales by seller'}); table(c.tv,['Seller','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n)])); }
 
   /* Suppliers: what we bought from each (COSTO = cost of goods, SHIPPING = freight) */
   { const g=groupBy(cur.filter(r=>r.ful&&r.ful!=='—'),r=>r.ful).sort((a,b)=>b.cost-a.cost); const totalCost=g.reduce((a,x)=>a+x.cost,0); const top=g.slice(0,10); const rest=g.slice(10);
     const tipFor=x=>[['Purchases (cost of goods)',money(x.cost)],['Shipping paid',money(x.ship)],['Share of purchases',pct(totalCost?x.cost/totalCost:NaN)],['Net sales generated',money(x.sales)],['Gross profit',money(x.profit)],['Margin',pct(x.margin)],['Orders',int(x.n)],['Units',int(x.items)]];
     const items=top.map(x=>({label:x.key,value:x.cost,tip:tipFor(x)}));
-    if(rest.length){ const ra=rest.reduce((a,x)=>({cost:a.cost+x.cost,ship:a.ship+x.ship,sales:a.sales+x.sales,profit:a.profit+x.profit,n:a.n+x.n,items:a.items+x.items}),{cost:0,ship:0,sales:0,profit:0,n:0,items:0}); ra.margin=ra.sales?ra.profit/ra.sales:NaN; items.push({label:`Other (${rest.length} suppliers)`,value:ra.cost,cls:'cde',tip:tipFor(ra)}); }
-    const c=card(cards.supplier,'Purchases by supplier', `${money(totalCost)} spent on goods · ${P.name}`); hbarChart(c.viz, vizWidth(cards.supplier), items, {aria:'Cost of goods bought from each supplier'});
+    if(rest.length){ const ra=rest.reduce((a,x)=>({cost:a.cost+x.cost,ship:a.ship+x.ship,sales:a.sales+x.sales,profit:a.profit+x.profit,n:a.n+x.n,items:a.items+x.items}),{cost:0,ship:0,sales:0,profit:0,n:0,items:0}); ra.margin=ra.sales?ra.profit/ra.sales:NaN; items.push({label:t('Other ({n} suppliers)',{n:rest.length}),value:ra.cost,cls:'cde',tip:tipFor(ra)}); }
+    const c=card(cards.supplier,'Purchases by supplier', `${t('{m} spent on goods',{m:money(totalCost)})} · ${P.name}`); hbarChart(c.viz, vizWidth(cards.supplier), items, {aria:'Cost of goods bought from each supplier'});
     table(c.tv,['Supplier','Purchases','Shipping','Share','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.cost),money(x.ship),pct(totalCost?x.cost/totalCost:NaN),money(x.sales),money(x.profit),pct(x.margin),int(x.n)])); }
 
   /* What we paid: cost of goods, shipping, fees */
   { const g=groupBy(cur,r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)).filter(x=>x.cost+x.ship>0);
-    const c=card(cards.costs,'What we paid', `Cost of goods, shipping and fees · ${P.name}`);
-    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',k),H('div','v',v),H('div','s',s)); return d; };
-    side.append(box('Cost of goods', money(A.cost), pct(A.sales?A.cost/A.sales:NaN)+' of net sales')); side.append(box('Shipping paid', money(A.ship), pct(A.sales?A.ship/A.sales:NaN)+' of net sales')); side.append(box('Marketplace & payment fees', money(A.fee), pct(A.sales?A.fee/A.sales:NaN)+' of net sales'));
+    const c=card(cards.costs,'What we paid', `${t('Cost of goods, shipping and fees')} · ${P.name}`);
+    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',t(k)),H('div','v',v),H('div','s',s)); return d; };
+    side.append(box('Cost of goods', money(A.cost), t('{p} of net sales',{p:pct(A.sales?A.cost/A.sales:NaN)}))); side.append(box('Shipping paid', money(A.ship), t('{p} of net sales',{p:pct(A.sales?A.ship/A.sales:NaN)}))); side.append(box('Marketplace & payment fees', money(A.fee), t('{p} of net sales',{p:pct(A.sales?A.fee/A.sales:NaN)})));
     c.viz.append(side); const host=H('div'); c.viz.append(host);
     hbarChart(host, vizWidth(cards.costs), g.map(x=>({label:x.key, value:x.cost+x.ship, segs:[{value:x.cost,cls:'c1'},{value:x.ship,cls:'c2'}], tip:[['Cost of goods',money(x.cost)],['Shipping',money(x.ship)],['Fees',money(x.fee)],['Net sales',money(x.sales)],['Gross profit',money(x.profit)],['Margin',pct(x.margin)],['Avg cost per unit',x.items?money(x.cost/x.items):'—']]})), {aria:'Cost of goods and shipping by product group', legend:[{label:'Cost of goods',color:cssVar('--s1')},{label:'Shipping',color:cssVar('--s2')}]});
     table(c.tv,['Product','Cost of goods','Shipping','Fees','Net sales','Profit','Margin','Avg cost / unit'], g.map(x=>[x.key,money(x.cost),money(x.ship),money(x.fee),money(x.sales),money(x.profit),pct(x.margin),x.items?money(x.cost/x.items):'—'])); }
@@ -572,9 +613,9 @@ function renderAll(){
   /* Returns & cancellations */
   { const all=R.filter(r=>dimOK(r,true)&&inRange(r,P.range)); const can=all.filter(r=>r.sc==='canceled'), rma=all.filter(r=>r.sc==='rma'), ret=all.filter(r=>r.sc==='return'), loss=all.filter(r=>r.sc==='loss');
     const c=card(cards.returns,'Cancellations and returns', P.name);
-    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',k),H('div','v',v),H('div','s',s)); return d; };
+    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',t(k)),H('div','v',v),H('div','s',s)); return d; };
     const inv=rs=>new Set(rs.map(r=>r.inv)).size;
-    side.append(box('Canceled', int(inv(can)), money(can.reduce((a,r)=>a+r.sales,0))+' not sold')); side.append(box('RMA', int(inv(rma)), money(Math.abs(rma.filter(r=>r.sales<0).reduce((a,r)=>a+r.sales,0)))+' returned')); side.append(box('Returns & refunds', int(inv(ret)+inv(loss)), money(-(ret.reduce((a,r)=>a+r.rcost,0)+loss.reduce((a,r)=>a+r.rcost,0)))+' return cost'));
+    side.append(box('Canceled', int(inv(can)), t('{m} not sold',{m:money(can.reduce((a,r)=>a+r.sales,0))}))); side.append(box('RMA', int(inv(rma)), t('{m} returned',{m:money(Math.abs(rma.filter(r=>r.sales<0).reduce((a,r)=>a+r.sales,0)))}))); side.append(box('Returns & refunds', int(inv(ret)+inv(loss)), t('{m} return cost',{m:money(-(ret.reduce((a,r)=>a+r.rcost,0)+loss.reduce((a,r)=>a+r.rcost,0)))})));
     c.viz.append(side);
     const chartHost=H('div'); c.viz.append(chartHost);
     const cnt=rs=>{ const m=new Map(months.map(k=>[k,new Set()])); for(const r of rs){ if(m.has(r.ym)) m.get(r.ym).add(r.inv); } return months.map(k=>m.get(k).size); };
@@ -589,22 +630,24 @@ function renderAll(){
 
 /* ---------- live data ---------- */
 const LIVE_URL=`https://docs.google.com/spreadsheets/d/${META.sheetId}/export?format=csv&gid=${META.gid}`;
-const timeStr=d=>d? d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+const timeStr=d=>d? d.toLocaleTimeString(LANG==='es'?'es-MX':'en-US', {hour:'numeric', minute:'2-digit'}) : '';
 function renderStatus(){
   const m=$('hdrmeta'); m.replaceChildren();
-  const m1=H('div'); m1.append(document.createTextNode('Data through '), H('b',null,fmtDate(maxDate)), document.createTextNode(' · '));
+  const m1=H('div'); m1.append(document.createTextNode(t('Data through ')), H('b',null,fmtDate(maxDate)), document.createTextNode(' · '));
   const badge=H('span','badge '+(SOURCE.live?'live':'snap')); badge.append(document.createElement('i'));
-  badge.append(document.createTextNode(SOURCE.loading? 'Reading the sheet…' : SOURCE.live? `Live · read ${timeStr(SOURCE.at)}` : `Snapshot from ${META.generated}`)); m1.append(badge);
-  const rb=H('button','reset', SOURCE.loading?'…':'Refresh'); rb.type='button'; rb.disabled=!!SOURCE.loading; rb.onclick=()=>refreshLive(true); m1.append(rb);
-  const m2=H('div'); if(SOURCE.error && !SOURCE.live) m2.append(H('span','warn',`Live read failed: ${SOURCE.error}. `));
-  const a=H('a',null,'Open the Google Sheet'); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener'; m2.append(a); m.append(m1,m2);
+  badge.append(document.createTextNode(SOURCE.loading? t('Reading the sheet…') : SOURCE.live? t('Live · read {t}',{t:timeStr(SOURCE.at)}) : t('Snapshot from {d}',{d:META.generated}))); m1.append(badge);
+  const rb=H('button','reset', SOURCE.loading?'…':t('Refresh')); rb.type='button'; rb.disabled=!!SOURCE.loading; rb.onclick=()=>refreshLive(true); m1.append(rb);
+  const m2=H('div'); if(SOURCE.error && !SOURCE.live) m2.append(H('span','warn',t('Live read failed: {e}. ',{e:t(SOURCE.error)})));
+  const a=H('a',null,t('Open the Google Sheet')); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener'; m2.append(a);
+  const g=H('a',null,t('User guide')); g.href='manual.html'; g.target='_blank'; g.rel='noopener'; m2.append(document.createTextNode(' · '), g);
+  const lw=H('span','langs'); for(const l of ['en','es']){ const b=H('button','langbtn',l.toUpperCase()); b.type='button'; b.setAttribute('aria-pressed',String(LANG===l)); b.onclick=()=>{ if(LANG!==l) setLang(l); }; lw.append(b); } m2.append(document.createTextNode(' · '), lw); m.append(m1,m2);
 }
 let refreshing=false, lastLive=0;
 async function refreshLive(){
   if(refreshing) return; refreshing=true; SOURCE={...SOURCE, loading:true}; renderStatus();
-  try{ const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(), 25000);
-    const res=await fetch(LIVE_URL,{cache:'no-store', signal:ctrl.signal}); clearTimeout(t);
-    if(!res.ok) throw new Error('Google answered HTTP '+res.status);
+  try{ const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(), 25000);
+    const res=await fetch(LIVE_URL,{cache:'no-store', signal:ctrl.signal}); clearTimeout(timer);
+    if(!res.ok) throw new Error(t('Google answered HTTP {s}',{s:res.status}));
     const text=await res.text(); const {rows,diag}=cleanCSV(text); if(rows.length<10) throw new Error('the sheet came back nearly empty');
     lastLive=Date.now(); setData(rows, diag, {live:true, at:new Date(), error:null, loading:false});
   }catch(e){ const msg = e.name==='AbortError' ? 'timed out' : (e instanceof TypeError ? 'the browser blocked the request (offline, a strict sandbox, or the sheet is no longer shared)' : e.message); SOURCE={...SOURCE, loading:false, error:msg}; renderStatus(); }
@@ -616,14 +659,14 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 let tableQ=''; let tableShown=40;
 function renderTable(cur){
   const el=cards.table; el.replaceChildren();
-  const h=H('div','card-h'); const left=H('div'); left.append(H('h2',null,'Invoice lines')); const sub=H('div','sub'); left.append(sub); h.append(left); el.append(h);
-  const tools=H('div','tbl-tools'); const inp=H('input'); inp.type='search'; inp.id='tblSearch'; inp.placeholder='Search product, invoice, supplier, payment…'; inp.value=tableQ; tools.append(inp); el.append(tools);
+  const h=H('div','card-h'); const left=H('div'); left.append(H('h2',null,t('Invoice lines'))); const sub=H('div','sub'); left.append(sub); h.append(left); el.append(h);
+  const tools=H('div','tbl-tools'); const inp=H('input'); inp.type='search'; inp.id='tblSearch'; inp.placeholder=t('Search product, invoice, supplier, payment…'); inp.value=tableQ; tools.append(inp); el.append(tools);
   const tv=H('div','tv'); el.append(tv); const more=H('div','more'); el.append(more);
   const sorted=[...cur].sort((a,b)=> a.d===b.d ? (b.inv>a.inv?1:-1) : (a.d<b.d?1:-1));
-  const draw=()=>{ const q=tableQ.trim().toLowerCase(); const rows=q? sorted.filter(r=>(r.prod+' '+r.inv+' '+r.ful+' '+r.pay+' '+r.type+' '+r.seller).toLowerCase().includes(q)) : sorted; sub.textContent=`${int(rows.length)} lines · newest first · canceled orders excluded`;
-    tv.replaceChildren(); const t=H('table'); const th=H('tr'); [['Date'],['Invoice'],['Channel'],['Product']  ,['Type'],['Supplier'],['Seller'],['Qty','n'],['Net sales','n'],['Profit','n'],['Margin','n'],['Status']].forEach(([n,c])=>th.append(H('th',c,n))); const thead=H('thead'); thead.append(th); t.append(thead);
-    const tb=H('tbody'); for(const r of rows.slice(0,tableShown)){ const tr=H('tr'); tr.append(H('td','dt',r.d)); tr.append(H('td',null,r.inv)); tr.append(H('td',null,r.ch)); tr.append(H('td','prod',r.prod||'—')); tr.append(H('td',null,r.type.toLowerCase().replace(/(^|\s|-)\S/g,s=>s.toUpperCase()))); tr.append(H('td',null,r.ful)); tr.append(H('td',null,r.seller||'—')); tr.append(H('td','n',int(r.qty))); tr.append(H('td','n',money(r.sales,true))); const pt=H('td','n',money(r.profit,true)); if(r.profit<0) pt.classList.add('neg'); tr.append(pt); tr.append(H('td','n',pct(r.sales?r.profit/r.sales:NaN))); const st=H('td'); if(r.sc==='rma') st.append(H('span','pill rma', r.paired?'RMA · original':(r.sales<0||r.qty<0?'RMA · reversal':'RMA'))); else if(r.sc==='return') st.append(H('span','pill ret',r.st.includes('REFUND')?'REFUND':'RETURN')); else st.textContent='Sold'; tr.append(st); tb.append(tr);} t.append(tb); tv.append(t);
-    more.replaceChildren(); if(rows.length>tableShown){ const b=H('button',null,`Show 40 more (${int(rows.length-tableShown)} left)`); b.type='button'; b.onclick=()=>{ tableShown+=40; draw(); }; more.append(b);} };
+  const draw=()=>{ const q=tableQ.trim().toLowerCase(); const rows=q? sorted.filter(r=>(r.prod+' '+r.inv+' '+r.ful+' '+r.pay+' '+r.type+' '+r.seller).toLowerCase().includes(q)) : sorted; sub.textContent=t('{n} lines · newest first · canceled orders excluded',{n:int(rows.length)});
+    tv.replaceChildren(); const tbl=H('table'); const th=H('tr'); [['Date'],['Invoice'],['Channel'],['Product']  ,['Type'],['Supplier'],['Seller'],['Qty','n'],['Net sales','n'],['Profit','n'],['Margin','n'],['Status']].forEach(([n,c])=>th.append(H('th',c,t(n)))); const thead=H('thead'); thead.append(th); tbl.append(thead);
+    const tb=H('tbody'); for(const r of rows.slice(0,tableShown)){ const tr=H('tr'); tr.append(H('td','dt',r.d)); tr.append(H('td',null,r.inv)); tr.append(H('td',null,r.ch)); tr.append(H('td','prod',r.prod||'—')); tr.append(H('td',null,r.type.toLowerCase().replace(/(^|\s|-)\S/g,s=>s.toUpperCase()))); tr.append(H('td',null,r.ful)); tr.append(H('td',null,r.seller||'—')); tr.append(H('td','n',int(r.qty))); tr.append(H('td','n',money(r.sales,true))); const pt=H('td','n',money(r.profit,true)); if(r.profit<0) pt.classList.add('neg'); tr.append(pt); tr.append(H('td','n',pct(r.sales?r.profit/r.sales:NaN))); const st=H('td'); if(r.sc==='rma') st.append(H('span','pill rma', r.paired?t('RMA · original'):(r.sales<0||r.qty<0?t('RMA · reversal'):'RMA'))); else if(r.sc==='return') st.append(H('span','pill ret',r.st.includes('REFUND')?t('REFUND'):t('RETURN'))); else st.textContent=t('Sold'); tr.append(st); tb.append(tr);} tbl.append(tb); tv.append(tbl);
+    more.replaceChildren(); if(rows.length>tableShown){ const b=H('button',null,t('Show 40 more ({n} left)',{n:int(rows.length-tableShown)})); b.type='button'; b.onclick=()=>{ tableShown+=40; draw(); }; more.append(b);} };
   inp.addEventListener('input',()=>{ tableQ=inp.value; tableShown=40; draw(); });
   draw();
 }
@@ -632,10 +675,10 @@ function renderNotes(){
   const n=$('notes'); n.replaceChildren();
   const sec=(title, items)=>{ const d=H('div'); d.append(H('h3',null,title)); const ul=H('ul'); for(const it of items){ const li=H('li'); if (typeof it==='string') li.textContent=it; else li.append(...it); ul.append(li);} d.append(ul); return d; };
   const ex=DIAG, dt=DIAG;
-  const a=H('a',null,'the Google Sheet'); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener';
-  n.append(sec('Where the numbers come from',[ [document.createTextNode('Tab “'+META.tab+'” of '), a, document.createTextNode(`, ${int(R.length)} invoice lines from ${fmtDate(minDate)} to ${fmtDate(maxDate)}${SOURCE.live?', read live from the sheet':', from the snapshot embedded in this page'}.`)], 'Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.', '“Purchases by supplier” and “What we paid” sum the COSTO column (what the goods cost us), the SHIPPING column (freight we paid) and the FEE column (marketplace and payment fees). Orders count distinct invoice numbers. “Products sold” counts wheel, tire, package and accessory units. Labor (mount and balance is entered per wheel) and charge lines also carry quantities, so a plain sum of the QTY column on the sheet is higher; the “Labor & services” card shows those separately and the “Units sold by product” card reconciles the two. “Wheels & tires sold” counts wheel, tire and package units only. Return lines with negative quantities reduce the totals.', 'Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.' ]));
-  n.append(sec('What was left out or repaired',[ `Since 2023 a returned order appears as its original line relabeled CANCELED plus an RMA line with negative amounts. Both legs are kept, so they net to zero and match a plain SUMIF on the sheet (${int(ex['canceled paired with RMA (kept)']||0)} lines). A CANCELED line with nothing offsetting it (the 2021–2022 convention) is an order that never shipped and is excluded; those appear only in the cancellations panel. Rows marked TEST were dropped (${int(ex['skip: TEST rows']||0)} lines).`, 'RMA, returned and refunded lines stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.', `Month and year come from the MONTH and YEAR columns. ${int(dt['date swapped']||0)} DATE cells had day and month swapped and were repaired; ${int((dt['date mismatch']||0)+(dt['date missing']||0)+(dt['date clamped']||0))} unreadable dates were placed within their month.`, `${int(ex['skip: no MONTH (empty pre-filled rows)']||0)} empty pre-filled rows and ${int(ex['skip: no YEAR (summary rows)']||0)} summary rows at the bottom of the tab were skipped.` ]));
-  n.append(sec('Keeping it current',[ 'The page reads the sheet directly every time it opens, every 10 minutes while it stays open, and when you press Refresh. New rows in the sheet show up on the next read.', 'If the sheet cannot be reached, the page falls back to the snapshot embedded when it was last built (python3 build.py in the project folder).', 'Filters are remembered in this browser only. Every chart has a Table view with the same numbers.' ]));
+  const a=H('a',null,t('the Google Sheet')); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener';
+  n.append(sec(t('Where the numbers come from'),[ [document.createTextNode(t('Tab “{tab}” of ',{tab:META.tab})), a, document.createTextNode(t(', {n} invoice lines from {a} to {b}{src}.',{n:int(R.length),a:fmtDate(minDate),b:fmtDate(maxDate),src:SOURCE.live?t(', read live from the sheet'):t(', from the snapshot embedded in this page')}))], t('Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.'), t('“Purchases by supplier” and “What we paid” sum the COSTO column (what the goods cost us), the SHIPPING column (freight we paid) and the FEE column (marketplace and payment fees). Orders count distinct invoice numbers. “Products sold” counts wheel, tire, package and accessory units. Labor (mount and balance is entered per wheel) and charge lines also carry quantities, so a plain sum of the QTY column on the sheet is higher; the “Labor & services” card shows those separately and the “Units sold by product” card reconciles the two. “Wheels & tires sold” counts wheel, tire and package units only. Return lines with negative quantities reduce the totals.'), t('Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.') ]));
+  n.append(sec(t('What was left out or repaired'),[ t('Since 2023 a returned order appears as its original line relabeled CANCELED plus an RMA line with negative amounts. Both legs are kept, so they net to zero and match a plain SUMIF on the sheet ({n} lines). A CANCELED line with nothing offsetting it (the 2021–2022 convention) is an order that never shipped and is excluded; those appear only in the cancellations panel. Rows marked TEST were dropped ({t} lines).',{n:int(ex['canceled paired with RMA (kept)']||0),t:int(ex['skip: TEST rows']||0)}), t('RMA, returned and refunded lines stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.'), t('Month and year come from the MONTH and YEAR columns. {s} DATE cells had day and month swapped and were repaired; {u} unreadable dates were placed within their month.',{s:int(dt['date swapped']||0),u:int((dt['date mismatch']||0)+(dt['date missing']||0)+(dt['date clamped']||0))}), t('{e} empty pre-filled rows and {s} summary rows at the bottom of the tab were skipped.',{e:int(ex['skip: no MONTH (empty pre-filled rows)']||0),s:int(ex['skip: no YEAR (summary rows)']||0)}) ]));
+  n.append(sec(t('Keeping it current'),[ t('The page reads the sheet directly every time it opens, every 10 minutes while it stays open, and when you press Refresh. New rows in the sheet show up on the next read.'), t('If the sheet cannot be reached, the page falls back to the snapshot embedded when it was last built (python3 build.py in the project folder).'), t('Filters are remembered in this browser only. Every chart has a Table view with the same numbers.') ]));
 }
 
 /* ---------- boot ---------- */

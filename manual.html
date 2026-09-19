@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>WBR Sales Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+:root{color-scheme:light;--bg:#f4f4f4;--surface:#fff;--ink:#111417;--ink-2:#4d4d4d;--muted:#8a8a8a;--border:rgba(17,20,23,.12);--brand:#ff0707;--brand-deep:#dd1d1d;--band:#111417}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Assistant",system-ui,-apple-system,"Segoe UI",sans-serif}
+.band{background:var(--band);color:#fff;border-top:6px solid var(--brand-deep)}
+.hdr{max-width:920px;margin:0 auto;padding:16px clamp(16px,3vw,32px) 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{height:52px;width:auto;background:#fff;padding:4px 8px;border-radius:4px;box-sizing:content-box}
+h1{font-size:26px;font-weight:800;margin:0;line-height:1.1}
+h1 small{display:block;font-size:14px;font-weight:400;color:#d3d6da;margin-top:4px}
+.tools{display:flex;align-items:center;gap:12px}
+.tools a{color:#ff8a86;font-weight:600}
+.langs{display:inline-flex;border:1px solid rgba(255,255,255,.3);border-radius:4px;overflow:hidden}
+.langbtn{border:0;background:transparent;color:#d3d6da;font:inherit;font-size:12px;font-weight:700;padding:4px 10px;cursor:pointer;letter-spacing:.04em}
+.langbtn[aria-pressed="true"]{background:var(--brand);color:#fff}
+main{max-width:920px;margin:0 auto;padding:22px clamp(16px,3vw,32px) 60px}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 18px;margin-bottom:18px;columns:2;column-gap:24px}
+.toc a{color:var(--ink);text-decoration:none;display:block;padding:3px 0;font-weight:600}
+.toc a:hover{color:var(--brand-deep)}
+section{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:18px 22px;margin-bottom:14px}
+h2{font-size:21px;font-weight:800;margin:0 0 10px;padding-bottom:8px;border-bottom:3px solid var(--brand-deep);display:inline-block}
+h3{font-size:16.5px;font-weight:700;margin:16px 0 6px}
+p,li{color:var(--ink);max-width:70ch}
+ul,ol{padding-left:22px;margin:6px 0}
+li{margin:4px 0}
+.tip{border-left:4px solid var(--brand-deep);background:#fff5f5;padding:10px 14px;border-radius:0 4px 4px 0;margin:12px 0}
+.kbd{display:inline-block;border:1px solid var(--border);border-radius:4px;padding:0 6px;font-weight:700;background:#f7f7f7;font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:8px 0}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.tv{overflow-x:auto}
+[lang-block]{display:none}
+html[lang="en"] [lang-block="en"],html[lang="es"] [lang-block="es"]{display:block}
+@media (max-width:600px){ .toc{columns:1} h1{font-size:22px} .logo{height:40px} }
+@media print{ .band{color:#000;background:#fff} .tools{display:none} section{border:0;padding:0 0 12px} }
+</style>
+</head>
+<body>
+<div class="band"><header class="hdr">
+  <div class="brand"><img class="logo" src="assets/logo.png" alt="Wheels Below Retail" width="200" height="103"><h1><span lang-block="en">User guide</span><span lang-block="es">Manual de uso</span><small><span lang-block="en">Wheels Below Retail · Sales dashboard</span><span lang-block="es">Wheels Below Retail · Tablero de ventas</span></small></h1></div>
+  <div class="tools"><a href="./"><span lang-block="en">Open the dashboard</span><span lang-block="es">Abrir el tablero</span></a><span class="langs" role="group" aria-label="Language"><button class="langbtn" type="button" data-lang="en">EN</button><button class="langbtn" type="button" data-lang="es">ES</button></span></div>
+</header></div>
+
+<main>
+<!-- ======================= ENGLISH ======================= -->
+<div lang-block="en">
+<nav class="toc">
+  <a href="#e1">1. What this is</a><a href="#e2">2. Opening it</a><a href="#e3">3. The header</a><a href="#e4">4. Filters</a><a href="#e5">5. The seven big numbers</a><a href="#e6">6. The cards</a><a href="#e7">7. Tables, tooltips, invoice list</a><a href="#e8">8. Where the numbers come from</a><a href="#e9">9. Why the dashboard may differ from the sheet</a><a href="#e10">10. Keeping the sheet clean</a><a href="#e11">11. Something looks wrong</a>
+</nav>
+
+<section id="e1"><h2>1. What this is</h2>
+<p>The dashboard is a web page that reads the Google Sheet <b>"Invoices 21-22-23-24-25-26"</b> and turns it into charts and totals. Nothing is typed into the dashboard. You keep entering invoices in the sheet as always, and the dashboard shows them.</p>
+<ul><li>It reads the sheet every time you open it, every 10 minutes while it stays open, and when you press <span class="kbd">Refresh</span>.</li><li>Money is in US dollars, whole amounts.</li><li>It works on a phone, a tablet or a computer.</li></ul>
+</section>
+
+<section id="e2"><h2>2. Opening it</h2>
+<ol><li>Go to the dashboard address (ask the owner for the link).</li><li>Type the password and press <span class="kbd">Open dashboard</span>. The password is the same for everyone; ask the owner if you don't have it.</li><li>Tick <b>Remember this device</b> if this is your own phone or computer. You won't be asked again on that device. Don't tick it on a shared computer.</li></ol>
+<div class="tip">The page is encrypted. Without the password the numbers cannot be read, even by someone who has the link.</div>
+</section>
+
+<section id="e3"><h2>3. The header</h2>
+<ul><li><b>Data through</b>: the date of the newest invoice in the sheet.</li><li><b>Live · read 4:23 PM</b> with a green dot: the numbers come straight from the sheet, read at that time.</li><li><b>Snapshot from …</b> with a gray dot: the sheet could not be reached, so you are seeing a saved copy. A red note explains why. Press <span class="kbd">Refresh</span> to try again.</li><li><b>Open the Google Sheet</b> jumps to the sheet itself.</li><li><b>EN / ES</b> switches the language. Your choice is remembered.</li></ul>
+</section>
+
+<section id="e4"><h2>4. Filters</h2>
+<p>Everything on the page (numbers, charts and the invoice list) follows the filters. Change one and everything updates.</p>
+<h3>Period (the time window)</h3>
+<ul><li><b>All time</b>: everything since August 2021.</li><li><b>2026 YTD</b>: January 1 to today. Compared against the same days of last year.</li><li><b>2025, 2024…</b>: a whole year, compared against the year before.</li><li><b>Last 12 months</b>: compared against the 12 months before that.</li><li><b>Month</b>: pick a year first, then a month. The chip changes to "Sep 2026" and every number is that month only, compared with the same month last year. The first chart switches to that month in every year, so you can see seasonality.</li><li><b>From / To</b>: any custom date range. Setting dates clears the month, and picking a month clears the dates, so they never fight each other.</li></ul>
+<h3>Dimensions</h3>
+<div class="tv"><table><tr><th>Filter</th><th>What it does</th></tr>
+<tr><td>Channel</td><td>Shopify, eBay or Amazon (the CANAL DE VENTA column).</td></tr>
+<tr><td>Product</td><td>Wheels, New tires, Used tires, Packages, Accessories, Labor, Other (from the TYPE column).</td></tr>
+<tr><td>Type</td><td>The exact TYPE value, for example "Accessories - TPMS". The list follows the Product you chose.</td></tr>
+<tr><td>Supplier</td><td>The FULFILLMENT column: who supplied the goods.</td></tr>
+<tr><td>Seller</td><td>The SELLER column.</td></tr>
+<tr><td>Payment</td><td>Card, Financing (Affirm, Snap, Acima, Kafene, Katapult, installments), Amazon, eBay, PayPal, Cash / wire.</td></tr>
+<tr><td>Status</td><td>"Sold + returns" is the normal view. "Clean sales only" hides anything that was returned. "RMA only" shows both halves of each return. "Returns &amp; refunds only" shows refund lines.</td></tr></table></div>
+<p><span class="kbd">Reset filters</span> puts everything back to the current year with no filters. Filters are remembered on your device.</p>
+</section>
+
+<section id="e5"><h2>5. The seven big numbers</h2>
+<div class="tv"><table><tr><th>Tile</th><th>Meaning</th></tr>
+<tr><td>Net sales</td><td>Sum of the VENTA column (price before tax) for the selected period and filters.</td></tr>
+<tr><td>Gross profit</td><td>Sum of the PROFIT column. The sheet already subtracts cost, shipping and fees.</td></tr>
+<tr><td>Profit margin</td><td>Gross profit divided by net sales.</td></tr>
+<tr><td>Orders</td><td>Number of different invoice numbers.</td></tr>
+<tr><td>Products sold</td><td>Quantity of wheels, tires, packages and accessories. Labor and charges are not counted here.</td></tr>
+<tr><td>Wheels &amp; tires sold</td><td>Quantity of wheels, tires and packages only.</td></tr>
+<tr><td>Avg order value</td><td>Net sales divided by orders.</td></tr></table></div>
+<p>The small line under each number is the change against the comparison period: green is better, red is worse. The little gray line is the month-by-month shape of the period, with the last month as a red dot.</p>
+</section>
+
+<section id="e6"><h2>6. The cards</h2>
+<ul>
+<li><b>Monthly net sales and gross profit</b>: red bars are sales, the black line is profit. Hover a bar for the numbers of that month.</li>
+<li><b>Net sales by month, year over year</b>: one line per year, January to December. The selected year is red, the year before is black, other years are gray. It always shows full years, whatever the period filter says.</li>
+<li><b>Sales channel</b>: Shopify, eBay, Amazon.</li>
+<li><b>Product mix</b>: net sales by product group.</li>
+<li><b>Units sold by product</b>: quantities. Red bars are products. Gray bars are labor and charges, which also carry a quantity in the sheet. The subtitle adds up to the plain sum of the QTY column, so it matches the sheet.</li>
+<li><b>Labor &amp; services</b>: units, revenue and profit from mount &amp; balance, custom paint, caps, drilling.</li>
+<li><b>Sales by seller</b>: from the SELLER column. "Not recorded" means the cell was empty.</li>
+<li><b>Sales by payment method</b>: with the fees each method cost, in the tooltip and table.</li>
+<li><b>Purchases by supplier</b>: how much you bought from each supplier (COSTO column), plus shipping, and what those goods sold for.</li>
+<li><b>What we paid</b>: cost of goods, shipping and fees, total and per product group. Red is goods, black is shipping.</li>
+<li><b>Cancellations and returns</b>: orders that were canceled, returned through RMA, or refunded, by month.</li>
+</ul>
+</section>
+
+<section id="e7"><h2>7. Tables, tooltips and the invoice list</h2>
+<ul><li>Every card has a <span class="kbd">Table</span> button that shows the same numbers as a table. Press it again to go back to the chart.</li><li>Hover (or tap) any bar or point to see its exact values.</li><li><b>Invoice lines</b> at the bottom lists every line in the current filters, newest first. Type in the search box to find a product, invoice number, supplier or payment type. Returned lines show an RMA or REFUND tag.</li></ul>
+</section>
+
+<section id="e8"><h2>8. Where the numbers come from</h2>
+<div class="tv"><table><tr><th>Dashboard</th><th>Sheet column</th></tr>
+<tr><td>Net sales</td><td>VENTA</td></tr><tr><td>Gross profit</td><td>PROFIT</td></tr><tr><td>Cost of goods / purchases</td><td>COSTO</td></tr><tr><td>Shipping paid</td><td>SHIPPING</td></tr><tr><td>Fees</td><td>FEE</td></tr><tr><td>Quantities</td><td>QTY</td></tr><tr><td>Period</td><td>MONTH and YEAR (the DATE cell is only used for the day)</td></tr><tr><td>Channel / Supplier / Seller / Payment</td><td>CANAL DE VENTA / FULFILLMENT / SELLER / PAYMENT TYPE</td></tr><tr><td>Product group</td><td>TYPE</td></tr><tr><td>Returns</td><td>STATUS (CANCELED, RMA, RETURN, REFUND)</td></tr></table></div>
+<p>Rows marked TEST are ignored. Empty pre-numbered rows and the totals at the bottom of the sheet are ignored.</p>
+</section>
+
+<section id="e9"><h2>9. Why the dashboard may differ from the sheet</h2>
+<ul>
+<li><b>Returns.</b> Since 2023 a return is two lines: the original marked CANCELED and an RMA line with negative amounts. The dashboard keeps both so they cancel out, exactly like a SUMIF on the sheet. Older CANCELED lines with no RMA partner (2021–2022) were orders that never shipped and are left out of sales.</li>
+<li><b>Products sold vs the QTY column.</b> The QTY column also has quantities on labor and charge lines (mount &amp; balance is one per wheel). "Products sold" leaves those out; the "Units sold by product" card shows both numbers.</li>
+<li><b>Missing cost.</b> If a line has no COSTO, the dashboard shows the sale with 100% margin, because that's what the sheet says. Fill in the cost and the profit corrects itself on the next read.</li>
+<li><b>Spelling.</b> "SD WHEEL" and "SD WHEELS" are two suppliers to the dashboard. Use one spelling.</li>
+</ul>
+</section>
+
+<section id="e10"><h2>10. Keeping the sheet clean (so the dashboard stays right)</h2>
+<ol>
+<li>Fill <b>MONTH</b> and <b>YEAR</b> on every line. The dashboard trusts them more than the DATE cell.</li>
+<li>Always enter <b>COSTO</b> on wheel and tire lines, the total for the line, not per unit.</li>
+<li>Put the real channel in <b>CANAL DE VENTA</b>. An eBay order marked "SHOPIFY WBR" shows up under Shopify.</li>
+<li>Fill <b>SELLER</b>, otherwise the seller chart shows "Not recorded".</li>
+<li>Type the same supplier name the same way every time (pick from the existing list).</li>
+<li>For a return, keep the two-line method: original line to CANCELED, plus an RMA line with negative quantity and amounts. Put the return shipping in RETURN COST.</li>
+<li>Don't leave TYPE empty. Tires are "NEW TIRE", wheels are "NEW WHEEL".</li>
+<li>Never type in the pre-numbered empty rows out of order, and don't reuse invoice numbers.</li>
+</ol>
+</section>
+
+<section id="e11"><h2>11. Something looks wrong</h2>
+<div class="tv"><table><tr><th>What you see</th><th>What to do</th></tr>
+<tr><td>Login card and dashboard on the same screen, or a blank page</td><td>Reload the page. If it persists, press Ctrl+Shift+R (hard refresh).</td></tr>
+<tr><td>"Snapshot from …" instead of "Live"</td><td>Check your internet. Press Refresh. If the red note says the sheet is not shared, the Google Sheet sharing must be "Anyone with the link can view".</td></tr>
+<tr><td>Password not accepted</td><td>Check caps lock and dashes. Ask the owner for the current password; it may have been changed.</td></tr>
+<tr><td>Everything shows $0</td><td>Look at the filters. A Month plus dates, or a Supplier that never sold in that period, gives zero. Press Reset filters.</td></tr>
+<tr><td>A number doesn't match the sheet</td><td>Read section 9. Then check the line in the invoice list at the bottom: usually it's a missing cost, a wrong channel or a mistyped date.</td></tr>
+<tr><td>A new invoice isn't there</td><td>The page reads the sheet on open and every 10 minutes. Press Refresh. Make sure the row has MONTH and YEAR filled in.</td></tr></table></div>
+</section>
+</div>
+
+<!-- ======================= ESPAÑOL ======================= -->
+<div lang-block="es">
+<nav class="toc">
+  <a href="#s1">1. Qué es</a><a href="#s2">2. Cómo entrar</a><a href="#s3">3. El encabezado</a><a href="#s4">4. Filtros</a><a href="#s5">5. Los siete números grandes</a><a href="#s6">6. Las tarjetas</a><a href="#s7">7. Tablas, detalles y lista de facturas</a><a href="#s8">8. De dónde salen los números</a><a href="#s9">9. Por qué puede diferir de la hoja</a><a href="#s10">10. Mantener la hoja limpia</a><a href="#s11">11. Algo se ve mal</a>
+</nav>
+
+<section id="s1"><h2>1. Qué es</h2>
+<p>El tablero es una página web que lee la hoja de Google <b>"Invoices 21-22-23-24-25-26"</b> y la convierte en gráficas y totales. En el tablero no se captura nada. Las facturas se siguen capturando en la hoja como siempre, y el tablero las muestra.</p>
+<ul><li>Lee la hoja cada vez que lo abres, cada 10 minutos mientras esté abierto y cuando pulsas <span class="kbd">Actualizar</span>.</li><li>El dinero está en dólares, en montos completos.</li><li>Funciona en celular, tableta o computadora.</li></ul>
+</section>
+
+<section id="s2"><h2>2. Cómo entrar</h2>
+<ol><li>Entra a la dirección del tablero (pídele el enlace al dueño).</li><li>Escribe la contraseña y pulsa <span class="kbd">Abrir tablero</span>. La contraseña es la misma para todos; pídela al dueño si no la tienes.</li><li>Marca <b>Recordar este dispositivo</b> si es tu propio celular o computadora. No te la volverá a pedir en ese equipo. No la marques en una computadora compartida.</li></ol>
+<div class="tip">La página está cifrada. Sin la contraseña no se pueden leer los números, aunque alguien tenga el enlace.</div>
+</section>
+
+<section id="s3"><h2>3. El encabezado</h2>
+<ul><li><b>Datos hasta el</b>: la fecha de la factura más reciente en la hoja.</li><li><b>En vivo · leído 4:23 PM</b> con punto verde: los números vienen directo de la hoja, leídos a esa hora.</li><li><b>Copia del …</b> con punto gris: no se pudo leer la hoja y estás viendo una copia guardada. Una nota en rojo explica por qué. Pulsa <span class="kbd">Actualizar</span> para intentar de nuevo.</li><li><b>Abrir la hoja de Google</b> te lleva a la hoja.</li><li><b>EN / ES</b> cambia el idioma. Tu elección se recuerda.</li></ul>
+</section>
+
+<section id="s4"><h2>4. Filtros</h2>
+<p>Todo en la página (números, gráficas y la lista de facturas) obedece a los filtros. Cambia uno y todo se actualiza.</p>
+<h3>Periodo (la ventana de tiempo)</h3>
+<ul><li><b>Todo el historial</b>: todo desde agosto de 2021.</li><li><b>2026 a la fecha</b>: del 1 de enero a hoy. Se compara con los mismos días del año pasado.</li><li><b>2025, 2024…</b>: un año completo, comparado con el año anterior.</li><li><b>Últimos 12 meses</b>: comparado con los 12 meses anteriores.</li><li><b>Mes</b>: primero elige un año y luego un mes. La ficha cambia a "sep 2026" y todos los números son solo de ese mes, comparados con el mismo mes del año pasado. La primera gráfica cambia a ese mes en cada año, para ver la temporada.</li><li><b>Desde / Hasta</b>: cualquier rango de fechas. Poner fechas quita el mes y elegir un mes quita las fechas, así nunca se contradicen.</li></ul>
+<h3>Dimensiones</h3>
+<div class="tv"><table><tr><th>Filtro</th><th>Qué hace</th></tr>
+<tr><td>Canal</td><td>Shopify, eBay o Amazon (columna CANAL DE VENTA).</td></tr>
+<tr><td>Producto</td><td>Rines, Llantas nuevas, Llantas usadas, Paquetes, Accesorios, Mano de obra, Otros (de la columna TYPE).</td></tr>
+<tr><td>Tipo</td><td>El valor exacto de TYPE, por ejemplo "Accessories - TPMS". La lista depende del Producto elegido.</td></tr>
+<tr><td>Proveedor</td><td>La columna FULFILLMENT: quién surtió la mercancía.</td></tr>
+<tr><td>Vendedor</td><td>La columna SELLER.</td></tr>
+<tr><td>Pago</td><td>Tarjeta, Financiamiento (Affirm, Snap, Acima, Kafene, Katapult, pagos a plazos), Amazon, eBay, PayPal, Efectivo / transferencia.</td></tr>
+<tr><td>Estatus</td><td>"Vendidos + devoluciones" es la vista normal. "Solo ventas limpias" oculta lo devuelto. "Solo RMA" muestra las dos mitades de cada devolución. "Solo devoluciones y reembolsos" muestra las líneas de reembolso.</td></tr></table></div>
+<p><span class="kbd">Limpiar filtros</span> regresa todo al año actual sin filtros. Los filtros se recuerdan en tu dispositivo.</p>
+</section>
+
+<section id="s5"><h2>5. Los siete números grandes</h2>
+<div class="tv"><table><tr><th>Cuadro</th><th>Significado</th></tr>
+<tr><td>Ventas netas</td><td>Suma de la columna VENTA (precio antes de impuestos) del periodo y filtros elegidos.</td></tr>
+<tr><td>Utilidad bruta</td><td>Suma de la columna PROFIT. La hoja ya resta costo, envío y comisiones.</td></tr>
+<tr><td>Margen de utilidad</td><td>Utilidad bruta entre ventas netas.</td></tr>
+<tr><td>Pedidos</td><td>Número de facturas distintas.</td></tr>
+<tr><td>Productos vendidos</td><td>Cantidad de rines, llantas, paquetes y accesorios. Mano de obra y cargos no cuentan aquí.</td></tr>
+<tr><td>Rines y llantas vendidos</td><td>Cantidad de rines, llantas y paquetes solamente.</td></tr>
+<tr><td>Ticket promedio</td><td>Ventas netas entre pedidos.</td></tr></table></div>
+<p>La línea pequeña debajo de cada número es el cambio contra el periodo de comparación: verde es mejor, rojo es peor. La rayita gris es la forma mes a mes del periodo, con el último mes como punto rojo.</p>
+</section>
+
+<section id="s6"><h2>6. Las tarjetas</h2>
+<ul>
+<li><b>Ventas netas y utilidad bruta por mes</b>: las barras rojas son ventas, la línea negra es utilidad. Pasa el cursor por una barra para ver los números de ese mes.</li>
+<li><b>Ventas netas por mes, año contra año</b>: una línea por año, de enero a diciembre. El año elegido va en rojo, el anterior en negro y los demás en gris. Siempre muestra años completos, sin importar el periodo elegido.</li>
+<li><b>Canal de venta</b>: Shopify, eBay, Amazon.</li>
+<li><b>Mezcla de productos</b>: ventas netas por grupo de producto.</li>
+<li><b>Unidades vendidas por producto</b>: cantidades. Las barras rojas son productos. Las grises son mano de obra y cargos, que en la hoja también llevan cantidad. El subtítulo suma igual que la columna QTY, así que cuadra con la hoja.</li>
+<li><b>Mano de obra y servicios</b>: unidades, ingresos y utilidad de montaje y balanceo, pintura, tapas, barrenado.</li>
+<li><b>Ventas por vendedor</b>: de la columna SELLER. "Sin registrar" significa que la celda estaba vacía.</li>
+<li><b>Ventas por método de pago</b>: con las comisiones que costó cada método, en el detalle y la tabla.</li>
+<li><b>Compras por proveedor</b>: cuánto se le compró a cada proveedor (columna COSTO), más envío, y en cuánto se vendió esa mercancía.</li>
+<li><b>Lo que pagamos</b>: costo de mercancía, envío y comisiones, en total y por grupo de producto. Rojo es mercancía, negro es envío.</li>
+<li><b>Cancelaciones y devoluciones</b>: pedidos cancelados, devueltos por RMA o reembolsados, por mes.</li>
+</ul>
+</section>
+
+<section id="s7"><h2>7. Tablas, detalles y la lista de facturas</h2>
+<ul><li>Cada tarjeta tiene un botón <span class="kbd">Tabla</span> que muestra los mismos números en tabla. Púlsalo otra vez para volver a la gráfica.</li><li>Pasa el cursor (o toca) cualquier barra o punto para ver sus valores exactos.</li><li><b>Líneas de factura</b>, al final, lista cada línea de los filtros actuales, la más reciente primero. Escribe en el buscador para encontrar un producto, número de factura, proveedor o tipo de pago. Las líneas devueltas llevan una etiqueta RMA o REEMBOLSO.</li></ul>
+</section>
+
+<section id="s8"><h2>8. De dónde salen los números</h2>
+<div class="tv"><table><tr><th>Tablero</th><th>Columna de la hoja</th></tr>
+<tr><td>Ventas netas</td><td>VENTA</td></tr><tr><td>Utilidad bruta</td><td>PROFIT</td></tr><tr><td>Costo de mercancía / compras</td><td>COSTO</td></tr><tr><td>Envío pagado</td><td>SHIPPING</td></tr><tr><td>Comisiones</td><td>FEE</td></tr><tr><td>Cantidades</td><td>QTY</td></tr><tr><td>Periodo</td><td>MONTH y YEAR (la celda DATE solo se usa para el día)</td></tr><tr><td>Canal / Proveedor / Vendedor / Pago</td><td>CANAL DE VENTA / FULFILLMENT / SELLER / PAYMENT TYPE</td></tr><tr><td>Grupo de producto</td><td>TYPE</td></tr><tr><td>Devoluciones</td><td>STATUS (CANCELED, RMA, RETURN, REFUND)</td></tr></table></div>
+<p>Las filas marcadas TEST se ignoran. Las filas prenumeradas vacías y los totales al final de la hoja se ignoran.</p>
+</section>
+
+<section id="s9"><h2>9. Por qué el tablero puede diferir de la hoja</h2>
+<ul>
+<li><b>Devoluciones.</b> Desde 2023 una devolución son dos líneas: la original marcada CANCELED y una línea RMA con montos negativos. El tablero conserva ambas para que se anulen, igual que un SUMIF en la hoja. Las líneas CANCELED antiguas sin pareja RMA (2021–2022) fueron pedidos que nunca se enviaron y se dejan fuera de ventas.</li>
+<li><b>Productos vendidos vs la columna QTY.</b> La columna QTY también tiene cantidades en líneas de mano de obra y cargos (montaje y balanceo es uno por rin). "Productos vendidos" las deja fuera; la tarjeta "Unidades vendidas por producto" muestra ambos números.</li>
+<li><b>Costo faltante.</b> Si una línea no tiene COSTO, el tablero muestra la venta con 100% de margen, porque eso dice la hoja. Captura el costo y la utilidad se corrige en la siguiente lectura.</li>
+<li><b>Ortografía.</b> "SD WHEEL" y "SD WHEELS" son dos proveedores para el tablero. Usa una sola forma de escribirlo.</li>
+</ul>
+</section>
+
+<section id="s10"><h2>10. Mantener la hoja limpia (para que el tablero siga bien)</h2>
+<ol>
+<li>Llena <b>MONTH</b> y <b>YEAR</b> en cada línea. El tablero les cree más que a la celda DATE.</li>
+<li>Captura siempre <b>COSTO</b> en líneas de rines y llantas, el total de la línea, no por unidad.</li>
+<li>Pon el canal real en <b>CANAL DE VENTA</b>. Un pedido de eBay marcado "SHOPIFY WBR" aparece en Shopify.</li>
+<li>Llena <b>SELLER</b>, si no la gráfica de vendedores muestra "Sin registrar".</li>
+<li>Escribe el nombre del proveedor siempre igual (elige de la lista existente).</li>
+<li>En una devolución, sigue el método de dos líneas: la original a CANCELED, más una línea RMA con cantidad y montos negativos. Pon el envío de la devolución en RETURN COST.</li>
+<li>No dejes TYPE vacío. Las llantas son "NEW TIRE", los rines "NEW WHEEL".</li>
+<li>No captures en las filas prenumeradas fuera de orden y no repitas números de factura.</li>
+</ol>
+</section>
+
+<section id="s11"><h2>11. Algo se ve mal</h2>
+<div class="tv"><table><tr><th>Lo que ves</th><th>Qué hacer</th></tr>
+<tr><td>La tarjeta de contraseña y el tablero en la misma pantalla, o una página en blanco</td><td>Recarga la página. Si sigue igual, pulsa Ctrl+Shift+R (recarga forzada).</td></tr>
+<tr><td>"Copia del …" en vez de "En vivo"</td><td>Revisa tu internet. Pulsa Actualizar. Si la nota roja dice que la hoja no está compartida, la hoja de Google debe estar en "Cualquier persona con el enlace puede ver".</td></tr>
+<tr><td>No acepta la contraseña</td><td>Revisa mayúsculas y guiones. Pide al dueño la contraseña actual; puede haber cambiado.</td></tr>
+<tr><td>Todo muestra $0</td><td>Revisa los filtros. Un Mes más fechas, o un Proveedor que no vendió en ese periodo, da cero. Pulsa Limpiar filtros.</td></tr>
+<tr><td>Un número no cuadra con la hoja</td><td>Lee la sección 9. Luego busca la línea en la lista de facturas al final: casi siempre es un costo faltante, un canal equivocado o una fecha mal escrita.</td></tr>
+<tr><td>Una factura nueva no aparece</td><td>La página lee la hoja al abrir y cada 10 minutos. Pulsa Actualizar. Asegúrate de que la fila tenga MONTH y YEAR llenos.</td></tr></table></div>
+</section>
+</div>
+</main>
+<script>
+(function(){
+  let LANG='en'; try{ LANG=localStorage.getItem('wbr-lang') || ((navigator.language||'').toLowerCase().startsWith('es')?'es':'en'); }catch(e){}
+  function apply(){ document.documentElement.lang=LANG; document.title = LANG==='es' ? 'Manual · WBR Sales' : 'WBR Sales Guide'; document.querySelectorAll('.langbtn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG))); }
+  document.querySelectorAll('.langbtn').forEach(b=>b.addEventListener('click',()=>{ LANG=b.dataset.lang; try{ localStorage.setItem('wbr-lang',LANG); }catch(e){} apply(); }));
+  apply();
+})();
+</script>
+</body>
+</html>
