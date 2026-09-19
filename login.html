@@ -61,7 +61,10 @@ const ENC = __ENC_JSON__;
   if(!(window.crypto&&crypto.subtle)){ fail('This page must be opened over https (or localhost) to unlock.'); go.disabled=true; }
   $('eye').addEventListener('click',()=>{ const t=pw.type==='password'; pw.type=t?'text':'password'; $('eye').textContent=t?'Hide':'Show'; pw.focus(); });
   async function deriveKey(password){ const km=await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:ENC.iter, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, true, ['decrypt']); }
-  async function unlock(key){ const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, data); const html=new TextDecoder().decode(pt); document.open(); document.write(html); document.close(); }
+  const loaded = () => document.readyState==='loading' ? new Promise(r=>document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve();
+  async function unlock(key){ const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, data); const html=new TextDecoder().decode(pt);
+    await loaded(); // document.open() is ignored while the page is still parsing, which would append the dashboard under the login card
+    document.open(); document.write(html); document.close(); }
   async function tryStored(){ let raw=null; try{ raw=sessionStorage.getItem(KEY)||localStorage.getItem(KEY); }catch(e){} if(!raw) return; try{ const key=await crypto.subtle.importKey('raw', b64(raw), {name:'AES-GCM'}, true, ['decrypt']); await unlock(key); }catch(e){ try{ sessionStorage.removeItem(KEY); localStorage.removeItem(KEY); }catch(_){} } }
   $('f').addEventListener('submit', async ev=>{ ev.preventDefault(); err.hidden=true; go.disabled=true; go.textContent='Unlocking…';
     try{ const key=await deriveKey(pw.value); const raw=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.exportKey('raw', key))));
