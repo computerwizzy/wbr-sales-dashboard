@@ -79,7 +79,7 @@ html[lang="en"] [lang-block="en"],html[lang="es"] [lang-block="es"]{display:bloc
 <h3>Dimensions</h3>
 <div class="tv"><table><tr><th>Filter</th><th>What it does</th></tr>
 <tr><td>Channel</td><td>Shopify, eBay or Amazon (the CANAL DE VENTA column).</td></tr>
-<tr><td>Product</td><td>Wheels, New tires, Used tires, Packages, Accessories, Labor, Other (from the TYPE column).</td></tr>
+<tr><td>Product</td><td>Wheels, New tires, Used tires, Packages, Accessories, Custom paint, Labor, Other (from the TYPE column).</td></tr>
 <tr><td>Type</td><td>The exact TYPE value, for example "Accessories - TPMS". The list follows the Product you chose.</td></tr>
 <tr><td>Supplier</td><td>The FULFILLMENT column: who supplied the goods.</td></tr>
 <tr><td>Seller</td><td>The SELLER column.</td></tr>
@@ -94,7 +94,7 @@ html[lang="en"] [lang-block="en"],html[lang="es"] [lang-block="es"]{display:bloc
 <tr><td>Gross profit</td><td>Sum of the PROFIT column. The sheet already subtracts cost, shipping and fees.</td></tr>
 <tr><td>Profit margin</td><td>Gross profit divided by net sales.</td></tr>
 <tr><td>Orders</td><td>Number of different invoice numbers.</td></tr>
-<tr><td>Products sold</td><td>Quantity of wheels, tires, packages and accessories. Labor and charges are not counted here.</td></tr>
+<tr><td>Products sold</td><td>Quantity of wheels, tires, packages, accessories and custom paint. Labor and charges are not counted here.</td></tr>
 <tr><td>Wheels &amp; tires sold</td><td>Quantity of wheels, tires and packages only.</td></tr>
 <tr><td>Avg order value</td><td>Net sales divided by orders.</td></tr></table></div>
 <p>The small line under each number is the change against the comparison period: green is better, red is worse. The little gray line is the month-by-month shape of the period, with the last month as a red dot.</p>
@@ -107,7 +107,7 @@ html[lang="en"] [lang-block="en"],html[lang="es"] [lang-block="es"]{display:bloc
 <li><b>Sales channel</b>: Shopify, eBay, Amazon.</li>
 <li><b>Product mix</b>: net sales by product group.</li>
 <li><b>Units sold by product</b>: quantities. Red bars are products. Gray bars are labor and charges, which also carry a quantity in the sheet. The subtitle adds up to the plain sum of the QTY column, so it matches the sheet.</li>
-<li><b>Labor &amp; services</b>: units, revenue and profit from mount &amp; balance, custom paint, caps, drilling.</li>
+<li><b>Labor &amp; services</b>: units, revenue and profit from mount &amp; balance, drilling and wheel swaps. Caps and custom paint count as products.</li>
 <li><b>Sales by seller</b>: from the SELLER column. "Not recorded" means the cell was empty.</li>
 <li><b>Sales by payment method</b>: with the fees each method cost, in the tooltip and table.</li>
 <li><b>Purchases by supplier</b>: how much you bought from each supplier (COSTO column), plus shipping, and what those goods sold for.</li>
@@ -186,7 +186,7 @@ html[lang="en"] [lang-block="en"],html[lang="es"] [lang-block="es"]{display:bloc
 <h3>Dimensiones</h3>
 <div class="tv"><table><tr><th>Filtro</th><th>Qué hace</th></tr>
 <tr><td>Canal</td><td>Shopify, eBay o Amazon (columna CANAL DE VENTA).</td></tr>
-<tr><td>Producto</td><td>Rines, Llantas nuevas, Llantas usadas, Paquetes, Accesorios, Mano de obra, Otros (de la columna TYPE).</td></tr>
+<tr><td>Producto</td><td>Rines, Llantas nuevas, Llantas usadas, Paquetes, Accesorios, Pintura personalizada, Mano de obra, Otros (de la columna TYPE).</td></tr>
 <tr><td>Tipo</td><td>El valor exacto de TYPE, por ejemplo "Accessories - TPMS". La lista depende del Producto elegido.</td></tr>
 <tr><td>Proveedor</td><td>La columna FULFILLMENT: quién surtió la mercancía.</td></tr>
 <tr><td>Vendedor</td><td>La columna SELLER.</td></tr>
@@ -201,7 +201,7 @@ html[lang="en"] [lang-block="en"],html[lang="es"] [lang-block="es"]{display:bloc
 <tr><td>Utilidad bruta</td><td>Suma de la columna PROFIT. La hoja ya resta costo, envío y comisiones.</td></tr>
 <tr><td>Margen de utilidad</td><td>Utilidad bruta entre ventas netas.</td></tr>
 <tr><td>Pedidos</td><td>Número de facturas distintas.</td></tr>
-<tr><td>Productos vendidos</td><td>Cantidad de rines, llantas, paquetes y accesorios. Mano de obra y cargos no cuentan aquí.</td></tr>
+<tr><td>Productos vendidos</td><td>Cantidad de rines, llantas, paquetes, accesorios y pintura personalizada. Mano de obra y cargos no cuentan aquí.</td></tr>
 <tr><td>Rines y llantas vendidos</td><td>Cantidad de rines, llantas y paquetes solamente.</td></tr>
 <tr><td>Ticket promedio</td><td>Ventas netas entre pedidos.</td></tr></table></div>
 <p>La línea pequeña debajo de cada número es el cambio contra el periodo de comparación: verde es mejor, rojo es peor. La rayita gris es la forma mes a mes del periodo, con el último mes como punto rojo.</p>
@@ -214,7 +214,7 @@ html[lang="en"] [lang-block="en"],html[lang="es"] [lang-block="es"]{display:bloc
 <li><b>Canal de venta</b>: Shopify, eBay, Amazon.</li>
 <li><b>Mezcla de productos</b>: ventas netas por grupo de producto.</li>
 <li><b>Unidades vendidas por producto</b>: cantidades. Las barras rojas son productos. Las grises son mano de obra y cargos, que en la hoja también llevan cantidad. El subtítulo suma igual que la columna QTY, así que cuadra con la hoja.</li>
-<li><b>Mano de obra y servicios</b>: unidades, ingresos y utilidad de montaje y balanceo, pintura, tapas, barrenado.</li>
+<li><b>Mano de obra y servicios</b>: unidades, ingresos y utilidad de montaje y balanceo, barrenado y cambios de rin. Las tapas y la pintura personalizada cuentan como productos.</li>
 <li><b>Ventas por vendedor</b>: de la columna SELLER. "Sin registrar" significa que la celda estaba vacía.</li>
 <li><b>Ventas por método de pago</b>: con las comisiones que costó cada método, en el detalle y la tabla.</li>
 <li><b>Compras por proveedor</b>: cuánto se le compró a cada proveedor (columna COSTO), más envío, y en cuánto se vendió esa mercancía.</li>
