@@ -214,6 +214,7 @@ tr:hover td{background:var(--surface-2)}
   </section>
   <section class="grid g3">
     <div class="card" id="cardLabor"></div>
+    <div class="card" id="cardOther"></div>
     <div class="card" id="cardSeller"></div>
     <div class="card" id="cardPay"></div>
   </section>
@@ -298,6 +299,7 @@ const ES={
  'Labor units':'Unidades de mano de obra','{n} orders':'{n} pedidos','Labor revenue':'Ingresos por mano de obra','{p} of net sales':'{p} de las ventas netas','Labor profit':'Utilidad de mano de obra','{p} margin':'{p} de margen',
  'Canceled':'Cancelados','RMA':'RMA','Returned / refunded':'Devueltos / reembolsados','Returns & refunds':'Devoluciones y reembolsos','{m} not sold':'{m} no vendidos','{m} returned':'{m} devueltos','{m} return cost':'{m} de costo de devolución',
  'Mount & Balance':'Montaje y balanceo','Custom Paint':'Pintura personalizada','Caps':'Tapas','Drilling':'Barrenado','Swap':'Cambio','Mount & Balanced Labor':'Montaje y balanceo',
+ 'Charges & adjustments':'Cargos y ajustes','Extra charges, taxes, shipping protection, payment lines':'Cargos extra, impuestos, protección de envío, líneas de pago','{n} lines':'{n} líneas','Lines':'Líneas','Amount':'Monto','No type':'Sin tipo','Extra Charge':'Cargo extra','Taxes':'Impuestos','Return':'Devolución','Shipping Protection':'Protección de envío','Payment - Finance Fee':'Pago - comisión de financiamiento','Payment Difference':'Diferencia de pago','Down Payment':'Enganche','Wheel Change':'Cambio de rin','Payment - Difference':'Diferencia de pago','Payment - Down Payment':'Enganche','Payment - Shipping':'Pago - envío','Wbr - Note':'Nota WBR',
  'Sold':'Vendido','RMA · original':'RMA · original','RMA · reversal':'RMA · reverso','REFUND':'REEMBOLSO','RETURN':'DEVOLUCIÓN','Search product, invoice, supplier, payment…':'Buscar producto, factura, proveedor, pago…','{n} lines · newest first · canceled orders excluded':'{n} líneas · más recientes primero · sin pedidos cancelados','Show 40 more ({n} left)':'Mostrar 40 más (faltan {n})',
  'No sales match these filters':'No hay ventas con estos filtros','No cancellations or returns in this period':'No hay cancelaciones ni devoluciones en este periodo',
  'Data through ':'Datos hasta el ','Reading the sheet…':'Leyendo la hoja…','Live · read {t}':'En vivo · leído {t}','Snapshot from {d}':'Copia del {d}','Live read failed: {e}. ':'Falló la lectura en vivo: {e}. ','Open the Google Sheet':'Abrir la hoja de Google','timed out':'se agotó el tiempo de espera','the browser blocked the request (offline, a strict sandbox, or the sheet is no longer shared)':'el navegador bloqueó la solicitud (sin conexión, un entorno restringido o la hoja ya no está compartida)','the sheet came back nearly empty':'la hoja llegó casi vacía','Google answered HTTP {s}':'Google respondió HTTP {s}',
@@ -506,7 +508,7 @@ function sparkline(vals){
 
 /* ---------- render ---------- */
 const $=id=>document.getElementById(id);
-let W=800; const cards={trend:$('cardTrend'),yoy:$('cardYoy'),channel:$('cardChannel'),group:$('cardGroup'),units:$('cardUnits'),labor:$('cardLabor'),pay:$('cardPay'),seller:$('cardSeller'),supplier:$('cardSupplier'),costs:$('cardCosts'),returns:$('cardReturns'),table:$('cardTable')};
+let W=800; const cards={trend:$('cardTrend'),yoy:$('cardYoy'),channel:$('cardChannel'),group:$('cardGroup'),units:$('cardUnits'),labor:$('cardLabor'),other:$('cardOther'),pay:$('cardPay'),seller:$('cardSeller'),supplier:$('cardSupplier'),costs:$('cardCosts'),returns:$('cardReturns'),table:$('cardTable')};
 function vizWidth(el){ return Math.max(280, el.clientWidth-34); }
 
 function renderFilters(){
@@ -584,6 +586,15 @@ function renderAll(){
     const nice=t=>titleCase((t.replace(/^LABOR\s*-\s*/,'')||'Labor').replace(/\bAND\b/g,'&'));
     hbarChart(host, vizWidth(cards.labor), g.map(x=>({label:nice(x.key),value:x.sales,tip:[['Revenue',money(x.sales)],['Units',int(x.qty)],['Profit',money(x.profit)],['Margin',pct(x.margin)],['Avg per unit',x.qty?money(x.sales/x.qty):'—'],['Orders',int(x.n)]]})), {aria:'Labor revenue by service type'});
     table(c.tv,['Service','Units','Revenue','Profit','Margin','Avg per unit','Orders'], g.map(x=>[nice(x.key),int(x.qty),money(x.sales),money(x.profit),pct(x.margin),x.qty?money(x.sales/x.qty):'—',int(x.n)])); }
+
+  /* Charges & adjustments (the 'Other' group) */
+  { const oth=cur.filter(r=>r.grp==='Other'); const OA=agg(oth); const g=groupBy(oth,r=>r.type==='—'?'No type':titleCase(r.type)).sort((a,b)=>b.qty-a.qty||b.sales-a.sales); 
+    const c=card(cards.other,'Charges & adjustments', `${t('Extra charges, taxes, shipping protection, payment lines')} · ${P.name}`);
+    const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',t(k)),H('div','v',v),H('div','s',s)); return d; };
+    side.append(box('Quantity on lines', int(OA.qty), t('{n} lines',{n:int(OA.lines)}))); side.append(box('Amount', money(OA.sales), t('{p} of net sales',{p:pct(A.sales?OA.sales/A.sales:NaN)}))); side.append(box('Profit', money(OA.profit), t('{p} margin',{p:pct(OA.margin)})));
+    c.viz.append(side); const host=H('div'); c.viz.append(host);
+    hbarChart(host, vizWidth(cards.other), g.map(x=>({label:x.key,value:x.qty,valueLabel:int(x.qty),cls:'cde',tip:[['Quantity on lines',int(x.qty)],['Lines',int(x.lines)],['Amount',money(x.sales)],['Profit',money(x.profit)],['Orders',int(x.n)]]})), {aria:'Quantity of charge and adjustment lines by type'});
+    table(c.tv,['Line type','Quantity','Lines','Amount','Profit','Orders'], g.map(x=>[x.key,int(x.qty),int(x.lines),money(x.sales),money(x.profit),int(x.n)])); }
 
   /* Payment methods */
   { const g=groupBy(cur,r=>r.payg).sort((a,b)=>b.sales-a.sales); const c=card(cards.pay,'Sales by payment method', t('Grouped from the PAYMENT TYPE column')+' · '+P.name);
