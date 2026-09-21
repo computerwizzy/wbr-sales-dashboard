@@ -300,6 +300,7 @@ const ES={
  'Canceled':'Cancelados','RMA':'RMA','Returned / refunded':'Devueltos / reembolsados','Returns & refunds':'Devoluciones y reembolsos','{m} not sold':'{m} no vendidos','{m} returned':'{m} devueltos','{m} return cost':'{m} de costo de devolución',
  'Mount & Balance':'Montaje y balanceo','Custom Paint':'Pintura personalizada','Caps':'Tapas','Drilling':'Barrenado','Swap':'Cambio','Mount & Balanced Labor':'Montaje y balanceo',
  'Charges & adjustments':'Cargos y ajustes','Extra charges, taxes, shipping protection, payment lines':'Cargos extra, impuestos, protección de envío, líneas de pago','{n} lines':'{n} líneas','Lines':'Líneas','Amount':'Monto','No type':'Sin tipo','Extra Charge':'Cargo extra','Taxes':'Impuestos','Return':'Devolución','Shipping Protection':'Protección de envío','Payment - Finance Fee':'Pago - comisión de financiamiento','Payment Difference':'Diferencia de pago','Down Payment':'Enganche','Wheel Change':'Cambio de rin','Payment - Difference':'Diferencia de pago','Payment - Down Payment':'Enganche','Payment - Shipping':'Pago - envío','Wbr - Note':'Nota WBR',
+ 'Monthly net sales':'Ventas netas por mes','{m} net sales, by year':'Ventas netas de {m}, por año','Updated nightly · {d}':'Se actualiza cada noche · {d}','Only your lines':'Solo tus líneas','What you see':'Qué estás viendo','Only invoice lines whose SELLER column includes {s}. Shared invoices (for example MIGUEL/SERGIO) appear for both sellers.':'Solo las líneas de factura cuya columna SELLER incluye a {s}. Las facturas compartidas (por ejemplo MIGUEL/SERGIO) aparecen para ambos vendedores.','Cost, profit, margin and supplier purchases are not shown on this page.':'En esta página no se muestran costo, utilidad, margen ni compras a proveedores.',
  'Sold':'Vendido','RMA · original':'RMA · original','RMA · reversal':'RMA · reverso','REFUND':'REEMBOLSO','RETURN':'DEVOLUCIÓN','Search product, invoice, supplier, payment…':'Buscar producto, factura, proveedor, pago…','{n} lines · newest first · canceled orders excluded':'{n} líneas · más recientes primero · sin pedidos cancelados','Show 40 more ({n} left)':'Mostrar 40 más (faltan {n})',
  'No sales match these filters':'No hay ventas con estos filtros','No cancellations or returns in this period':'No hay cancelaciones ni devoluciones en este periodo',
  'Data through ':'Datos hasta el ','Reading the sheet…':'Leyendo la hoja…','Live · read {t}':'En vivo · leído {t}','Snapshot from {d}':'Copia del {d}','Live read failed: {e}. ':'Falló la lectura en vivo: {e}. ','Open the Google Sheet':'Abrir la hoja de Google','timed out':'se agotó el tiempo de espera','the browser blocked the request (offline, a strict sandbox, or the sheet is no longer shared)':'el navegador bloqueó la solicitud (sin conexión, un entorno restringido o la hoja ya no está compartida)','the sheet came back nearly empty':'la hoja llegó casi vacía','Google answered HTTP {s}':'Google respondió HTTP {s}',
@@ -318,8 +319,11 @@ const ES={
  'Filters are remembered in this browser only. Every chart has a Table view with the same numbers.':'Los filtros se recuerdan solo en este navegador. Cada gráfica tiene una vista de Tabla con los mismos números.'
 };
 function t(key, vars){ let out = (LANG==='es' && ES[key]!=null) ? ES[key] : key; if(vars) for(const k in vars) out=out.split('{'+k+'}').join(String(vars[k])); return out; }
-function applyLang(){ MONTHS = LANG==='es'?MONTHS_ES:MONTHS_EN; MONTHS_FULL = LANG==='es'?MONTHS_FULL_ES:MONTHS_FULL_EN; document.documentElement.lang=LANG; document.querySelectorAll('[data-t]').forEach(el=>{ el.textContent=t(el.dataset.t); }); }
+function applyLang(){ MONTHS = LANG==='es'?MONTHS_ES:MONTHS_EN; MONTHS_FULL = LANG==='es'?MONTHS_FULL_ES:MONTHS_FULL_EN; document.documentElement.lang=LANG; document.querySelectorAll('[data-t]').forEach(el=>{ el.textContent=t(el.dataset.t); }); if(typeof SELLER!=='undefined' && SELLER){ const h=document.querySelector('[data-t="Sales dashboard"]'); if(h) h.textContent=t('Sales dashboard')+' · '+titleCase(SELLER); } }
 function setLang(l){ LANG=l; try{ localStorage.setItem('wbr-lang', l); }catch(e){} applyLang(); PERIODS=buildPeriods(); renderFilters(); renderAll(); }
+const SELLER = (META.seller||'').toUpperCase();          // seller mode: page shows one seller's lines, sales side only
+const HIDE_COL = /profit|margin|cost|fee|purchases|utilidad|margen|costo|comisi|compras/i;
+const scope = rows => SELLER ? rows.filter(r => r.seller.toUpperCase().split('/').includes(SELLER)) : rows;
 applyLang();
 const CH_SLOT = {Shopify:1, eBay:2, Amazon:3};
 const GROUP_ORDER = ['Wheels','New tires','Used tires','Packages','Accessories','Custom paint','Labor','Other'];
@@ -381,7 +385,7 @@ function truncate(s, max){ return s.length>max ? s.slice(0, Math.max(1,max-1)).t
 const tip = document.getElementById('tip');
 function showTip(evt, title, rows){
   tip.replaceChildren(); tip.append(H('div','t',title));
-  for (const [name,val,color] of rows){ const r=H('div','r'); const n=H('span','n'); if(color){ const i=document.createElement('i'); i.style.borderColor=color; n.append(i);} n.append(document.createTextNode(t(name))); r.append(n, H('span','v',val)); tip.append(r); }
+  for (const [name,val,color] of (SELLER ? rows.filter(x=>!HIDE_COL.test(x[0])) : rows)){ const r=H('div','r'); const n=H('span','n'); if(color){ const i=document.createElement('i'); i.style.borderColor=color; n.append(i);} n.append(document.createTextNode(t(name))); r.append(n, H('span','v',val)); tip.append(r); }
   tip.hidden=false; moveTip(evt);
 }
 function moveTip(evt){ const pad=14, w=tip.offsetWidth, h=tip.offsetHeight; let x=evt.pageX+pad, y=evt.pageY+pad; const maxX=document.documentElement.scrollWidth-w-8; if (x>maxX) x=evt.pageX-w-pad; if (y+h>window.scrollY+window.innerHeight-8) y=evt.pageY-h-pad; tip.style.left=x+'px'; tip.style.top=y+'px'; }
@@ -404,6 +408,7 @@ function card(el, title, sub){
   return {viz, tv, setSub:t=>{ left.querySelector('.sub').textContent=t; }};
 }
 function table(tv, headers, rows, numericFrom=1){
+  if(SELLER){ const keep=headers.map(h=>!HIDE_COL.test(h)); headers=headers.filter((h,i)=>keep[i]); rows=rows.map(r=>r.filter((c,i)=>keep[i])); }
   tv.replaceChildren(); const tbl=H('table'); const thead=H('thead'); const tr=H('tr');
   headers.forEach((h,i)=>{ const th=H('th', i>=numericFrom?'n':null, t(h)); tr.append(th); }); thead.append(tr);
   const tb=H('tbody'); for(const r of rows){ const tr=H('tr'); r.forEach((c,i)=>{ const td=H('td', i>=numericFrom?'n':null, t(String(c))); if (typeof c==='string' && c.startsWith('-$')) td.classList.add('neg'); tr.append(td);}); tb.append(tr);} tbl.append(thead,tb); tv.append(tbl);
@@ -530,6 +535,7 @@ function renderFilters(){
   fill($('fChannel'),'channel',chans,'All channels'); fill($('fGroup'),'group',groups,'All products'); fill($('fType'),'type',types,'All types'); fill($('fSupplier'),'supplier',sups,'All suppliers'); fill($('fSeller'),'seller',sellers,'All sellers'); fill($('fPay'),'pay',pays,'All payment methods');
   fill($('fStatus'),'status',Object.entries(STATUS_LABEL),'Sold + returns');
   { const sel=$('fMonth'); sel.replaceChildren(); const yr=isYearPeriod(); if(!yr) f.month=0; const o=H('option',null, yr?t('Whole year'):t('Pick a year first')); o.value='0'; sel.append(o); if(yr) MONTHS_FULL.forEach((m,i)=>{ const oo=H('option',null,m); oo.value=String(i+1); sel.append(oo); }); sel.value=String(f.month||0); sel.disabled=!yr; sel.title=yr?'':t('Choose a year above to pick a month'); sel.onchange=()=>{ f.month=+sel.value; f.from=''; f.to=''; saveState(); renderFilters(); renderAll(); }; }
+  if(SELLER){ $('fSeller').closest('.fgroup').hidden=true; $('fSupplier').closest('.fgroup').hidden=true; f.seller='all'; f.supplier='all'; }
   $('reset').onclick=()=>{ Object.assign(f,{period:String(curYear), month:0, channel:'all', group:'all', type:'all', seller:'all', supplier:'all', pay:'all', status:'all', from:'', to:''}); saveState(); renderFilters(); renderAll(); };
 }
 
@@ -551,15 +557,14 @@ function renderAll(){
   const tile=(label, val, curV, prevV, spark, upGood=true, isPct=false)=>{ const el=H('div','kpi'); el.append(H('div','lbl',t(label))); el.append(H('div','val num-prop',val)); if(spark) el.append(spark); const d=H('div','dlt'); if(B && prevV!=null && isFinite(prevV) && prevV!==0 && isFinite(curV)){ const ch= isPct ? (curV-prevV) : (curV-prevV)/Math.abs(prevV); const b=H('b',null, isPct ? (ch>=0?'+':'−')+nf1.format(Math.abs(ch)*100)+' '+t('pts') : (ch>=0?'+':'−')+nf1.format(Math.abs(ch)*100)+'%'); b.classList.add((ch>=0)===upGood?'up':'down'); d.append(b, document.createTextNode(P.cmpLabel)); } else if (B){ d.append(document.createTextNode(t('no comparable prior period'))); } else { d.append(document.createTextNode(P.id==='all'?t('all recorded sales'):t('no prior year in the ledger'))); } el.append(d); return el; };
   const sp=mm.map(x=>x.sales);
   k.append(tile('Net sales', money(A.sales), A.sales, B?.sales, sparkline(sp)));
-  k.append(tile('Gross profit', money(A.profit), A.profit, B?.profit, sparkline(mm.map(x=>x.profit))));
-  k.append(tile('Profit margin', pct(A.margin), A.margin, B?.margin, null, true, true));
+  if(!SELLER){ k.append(tile('Gross profit', money(A.profit), A.profit, B?.profit, sparkline(mm.map(x=>x.profit)))); k.append(tile('Profit margin', pct(A.margin), A.margin, B?.margin, null, true, true)); }
   k.append(tile('Orders', int(A.n), A.n, B?.n, sparkline(mm.map(x=>x.n))));
   k.append(tile('Products sold', int(A.items), A.items, B?.items, sparkline(mm.map(x=>x.items))));
   k.append(tile('Wheels & tires sold', int(A.units), A.units, B?.units, null));
   k.append(tile('Avg order value', isFinite(A.aov)?money(A.aov,true):'—', A.aov, B?.aov, null));
 
   /* Trend */
-  { const c=card(cards.trend, monthMode?t('{m} net sales and gross profit, by year',{m:MONTHS_FULL[f.month-1]}):'Monthly net sales and gross profit', monthMode?`${t('{m} of every year',{m:MONTHS_FULL[f.month-1]})}${dimTxt?' · '+dimTxt:''}`:P.name); columnChart(c.viz, W, months, [ {name:'Net sales',cls:'c1',color:cssVar('--s1'),values:mm.map(x=>x.sales)}, {name:'Gross profit',cls:'l2',fillCls:'c2',color:cssVar('--s2'),values:mm.map(x=>x.profit),kind:'line'} ], {aria:'Monthly net sales bars with gross profit line', xLabel: monthMode ? (ym=>ym.slice(0,4)) : null, tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`, tipRows:i=>[['Net sales',money(mm[i].sales,true),cssVar('--s1')],['Gross profit',money(mm[i].profit,true),cssVar('--s2')],['Margin',pct(mm[i].sales?mm[i].profit/mm[i].sales:NaN)],['Orders',int(mm[i].n)],['Products sold',int(mm[i].items)]]}); table(c.tv,['Month','Net sales','Gross profit','Margin','Orders','Products sold'], mm.map(x=>[`${MONTHS[+x.ym.slice(5,7)-1]} ${x.ym.slice(0,4)}`, money(x.sales,true), money(x.profit,true), pct(x.sales?x.profit/x.sales:NaN), int(x.n), int(x.items)])); }
+  { const c=card(cards.trend, SELLER ? (monthMode?t('{m} net sales, by year',{m:MONTHS_FULL[f.month-1]}):'Monthly net sales') : monthMode?t('{m} net sales and gross profit, by year',{m:MONTHS_FULL[f.month-1]}):'Monthly net sales and gross profit', monthMode?`${t('{m} of every year',{m:MONTHS_FULL[f.month-1]})}${dimTxt?' · '+dimTxt:''}`:P.name); columnChart(c.viz, W, months, SELLER ? [ {name:'Net sales',cls:'c1',color:cssVar('--s1'),values:mm.map(x=>x.sales)} ] : [ {name:'Net sales',cls:'c1',color:cssVar('--s1'),values:mm.map(x=>x.sales)}, {name:'Gross profit',cls:'l2',fillCls:'c2',color:cssVar('--s2'),values:mm.map(x=>x.profit),kind:'line'} ], {aria:'Monthly net sales bars with gross profit line', xLabel: monthMode ? (ym=>ym.slice(0,4)) : null, tipTitle:i=>`${MONTHS[+months[i].slice(5,7)-1]} ${months[i].slice(0,4)}`, tipRows:i=>[['Net sales',money(mm[i].sales,true),cssVar('--s1')],['Gross profit',money(mm[i].profit,true),cssVar('--s2')],['Margin',pct(mm[i].sales?mm[i].profit/mm[i].sales:NaN)],['Orders',int(mm[i].n)],['Products sold',int(mm[i].items)]]}); table(c.tv,['Month','Net sales','Gross profit','Margin','Orders','Products sold'], mm.map(x=>[`${MONTHS[+x.ym.slice(5,7)-1]} ${x.ym.slice(0,4)}`, money(x.sales,true), money(x.profit,true), pct(x.sales?x.profit/x.sales:NaN), int(x.n), int(x.items)])); }
 
   /* YoY */
   { const focus = /^\d{4}$/.test(P.id)? +P.id : curYear; const prior = years.includes(focus-1)? focus-1 : null; const data={}; const yoyRows=sales; for(const y of years){ const arr=Array(12).fill(null); const rs=yoyRows.filter(r=>r.y===y); for(const r of rs){ arr[r.m-1]=(arr[r.m-1]||0)+r.sales; } if (y===curYear){ const lastM=+maxDate.slice(5,7); for(let i=0;i<lastM;i++) if(arr[i]==null) arr[i]=0; } else { const first=Math.min(...rs.map(r=>r.m), 13); for(let i=first-1;i<12;i++) if(arr[i]==null) arr[i]=0; } data[y]=arr; }
@@ -581,7 +586,7 @@ function renderAll(){
   { const lab=cur.filter(r=>r.grp==='Labor'); const LA=agg(lab); const g=groupBy(lab,r=>r.type).sort((a,b)=>b.sales-a.sales);
     const c=card(cards.labor,'Labor & services', `${t('Mount & balance, drilling, swaps')} · ${P.name}`);
     const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',t(k)),H('div','v',v),H('div','s',s)); return d; };
-    side.append(box('Labor units', int(LA.qty), t('{n} orders',{n:int(LA.n)}))); side.append(box('Labor revenue', money(LA.sales), t('{p} of net sales',{p:pct(A.sales?LA.sales/A.sales:NaN)}))); side.append(box('Labor profit', money(LA.profit), t('{p} margin',{p:pct(LA.margin)})));
+    side.append(box('Labor units', int(LA.qty), t('{n} orders',{n:int(LA.n)}))); side.append(box('Labor revenue', money(LA.sales), t('{p} of net sales',{p:pct(A.sales?LA.sales/A.sales:NaN)}))); if(!SELLER) side.append(box('Labor profit', money(LA.profit), t('{p} margin',{p:pct(LA.margin)})));
     c.viz.append(side); const host=H('div'); c.viz.append(host);
     const nice=t=>titleCase((t.replace(/^LABOR\s*-\s*/,'')||'Labor').replace(/\bAND\b/g,'&'));
     hbarChart(host, vizWidth(cards.labor), g.map(x=>({label:nice(x.key),value:x.sales,tip:[['Revenue',money(x.sales)],['Units',int(x.qty)],['Profit',money(x.profit)],['Margin',pct(x.margin)],['Avg per unit',x.qty?money(x.sales/x.qty):'—'],['Orders',int(x.n)]]})), {aria:'Labor revenue by service type'});
@@ -591,7 +596,7 @@ function renderAll(){
   { const oth=cur.filter(r=>r.grp==='Other'); const OA=agg(oth); const g=groupBy(oth,r=>r.type==='—'?'No type':titleCase(r.type)).sort((a,b)=>b.qty-a.qty||b.sales-a.sales); 
     const c=card(cards.other,'Charges & adjustments', `${t('Extra charges, taxes, shipping protection, payment lines')} · ${P.name}`);
     const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',t(k)),H('div','v',v),H('div','s',s)); return d; };
-    side.append(box('Quantity on lines', int(OA.qty), t('{n} lines',{n:int(OA.lines)}))); side.append(box('Amount', money(OA.sales), t('{p} of net sales',{p:pct(A.sales?OA.sales/A.sales:NaN)}))); side.append(box('Profit', money(OA.profit), t('{p} margin',{p:pct(OA.margin)})));
+    side.append(box('Quantity on lines', int(OA.qty), t('{n} lines',{n:int(OA.lines)}))); side.append(box('Amount', money(OA.sales), t('{p} of net sales',{p:pct(A.sales?OA.sales/A.sales:NaN)}))); if(!SELLER) side.append(box('Profit', money(OA.profit), t('{p} margin',{p:pct(OA.margin)})));
     c.viz.append(side); const host=H('div'); c.viz.append(host);
     hbarChart(host, vizWidth(cards.other), g.map(x=>({label:x.key,value:x.qty,valueLabel:int(x.qty),cls:'cde',tip:[['Quantity on lines',int(x.qty)],['Lines',int(x.lines)],['Amount',money(x.sales)],['Profit',money(x.profit)],['Orders',int(x.n)]]})), {aria:'Quantity of charge and adjustment lines by type'});
     table(c.tv,['Line type','Quantity','Lines','Amount','Profit','Orders'], g.map(x=>[x.key,int(x.qty),int(x.lines),money(x.sales),money(x.profit),int(x.n)])); }
@@ -602,10 +607,10 @@ function renderAll(){
     table(c.tv,['Payment method','Net sales','Share','Fees','Fees %','Orders'], g.map(x=>[x.key,money(x.sales),pct(A.sales?x.sales/A.sales:NaN),money(x.fee),pct(x.sales?x.fee/x.sales:NaN),int(x.n)])); }
 
   /* Seller */
-  { const g=groupBy(cur,r=>r.seller||'Not recorded').sort((a,b)=>b.sales-a.sales); const c=card(cards.seller,'Sales by seller', t('Seller column of the ledger')+' · '+P.name); hbarChart(c.viz, vizWidth(cards.seller), g.map(x=>({label:x.key,value:x.sales,cls:x.key==='Not recorded'?'cde':'c1',tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Orders',int(x.n)]]})), {aria:'Net sales by seller'}); table(c.tv,['Seller','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n)])); }
+  if(SELLER){ cards.seller.hidden=true; cards.supplier.hidden=true; cards.costs.hidden=true; cards.supplier.parentElement.hidden=true; } else { const g=groupBy(cur,r=>r.seller||'Not recorded').sort((a,b)=>b.sales-a.sales); const c=card(cards.seller,'Sales by seller', t('Seller column of the ledger')+' · '+P.name); hbarChart(c.viz, vizWidth(cards.seller), g.map(x=>({label:x.key,value:x.sales,cls:x.key==='Not recorded'?'cde':'c1',tip:[['Net sales',money(x.sales,true)],['Gross profit',money(x.profit,true)],['Margin',pct(x.margin)],['Orders',int(x.n)]]})), {aria:'Net sales by seller'}); table(c.tv,['Seller','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.sales,true),money(x.profit,true),pct(x.margin),int(x.n)])); }
 
   /* Suppliers: what we bought from each (COSTO = cost of goods, SHIPPING = freight) */
-  { const g=groupBy(cur.filter(r=>r.ful&&r.ful!=='—'),r=>r.ful).sort((a,b)=>b.cost-a.cost); const totalCost=g.reduce((a,x)=>a+x.cost,0); const top=g.slice(0,10); const rest=g.slice(10);
+  if(!SELLER) { const g=groupBy(cur.filter(r=>r.ful&&r.ful!=='—'),r=>r.ful).sort((a,b)=>b.cost-a.cost); const totalCost=g.reduce((a,x)=>a+x.cost,0); const top=g.slice(0,10); const rest=g.slice(10);
     const tipFor=x=>[['Purchases (cost of goods)',money(x.cost)],['Shipping paid',money(x.ship)],['Share of purchases',pct(totalCost?x.cost/totalCost:NaN)],['Net sales generated',money(x.sales)],['Gross profit',money(x.profit)],['Margin',pct(x.margin)],['Orders',int(x.n)],['Units',int(x.items)]];
     const items=top.map(x=>({label:x.key,value:x.cost,tip:tipFor(x)}));
     if(rest.length){ const ra=rest.reduce((a,x)=>({cost:a.cost+x.cost,ship:a.ship+x.ship,sales:a.sales+x.sales,profit:a.profit+x.profit,n:a.n+x.n,items:a.items+x.items}),{cost:0,ship:0,sales:0,profit:0,n:0,items:0}); ra.margin=ra.sales?ra.profit/ra.sales:NaN; items.push({label:t('Other ({n} suppliers)',{n:rest.length}),value:ra.cost,cls:'cde',tip:tipFor(ra)}); }
@@ -613,7 +618,7 @@ function renderAll(){
     table(c.tv,['Supplier','Purchases','Shipping','Share','Net sales','Profit','Margin','Orders'], g.map(x=>[x.key,money(x.cost),money(x.ship),pct(totalCost?x.cost/totalCost:NaN),money(x.sales),money(x.profit),pct(x.margin),int(x.n)])); }
 
   /* What we paid: cost of goods, shipping, fees */
-  { const g=groupBy(cur,r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)).filter(x=>x.cost+x.ship>0);
+  if(!SELLER) { const g=groupBy(cur,r=>r.grp).sort((a,b)=>GROUP_ORDER.indexOf(a.key)-GROUP_ORDER.indexOf(b.key)).filter(x=>x.cost+x.ship>0);
     const c=card(cards.costs,'What we paid', `${t('Cost of goods, shipping and fees')} · ${P.name}`);
     const side=H('div','side'); const box=(k,v,s)=>{ const d=H('div'); d.append(H('div','k',t(k)),H('div','v',v),H('div','s',s)); return d; };
     side.append(box('Cost of goods', money(A.cost), t('{p} of net sales',{p:pct(A.sales?A.cost/A.sales:NaN)}))); side.append(box('Shipping paid', money(A.ship), t('{p} of net sales',{p:pct(A.sales?A.ship/A.sales:NaN)}))); side.append(box('Marketplace & payment fees', money(A.fee), t('{p} of net sales',{p:pct(A.sales?A.fee/A.sales:NaN)})));
@@ -646,11 +651,12 @@ function renderStatus(){
   const m=$('hdrmeta'); m.replaceChildren();
   const m1=H('div'); m1.append(document.createTextNode(t('Data through ')), H('b',null,fmtDate(maxDate)), document.createTextNode(' · '));
   const badge=H('span','badge '+(SOURCE.live?'live':'snap')); badge.append(document.createElement('i'));
-  badge.append(document.createTextNode(SOURCE.loading? t('Reading the sheet…') : SOURCE.live? t('Live · read {t}',{t:timeStr(SOURCE.at)}) : t('Snapshot from {d}',{d:META.generated}))); m1.append(badge);
-  const rb=H('button','reset', SOURCE.loading?'…':t('Refresh')); rb.type='button'; rb.disabled=!!SOURCE.loading; rb.onclick=()=>refreshLive(true); m1.append(rb);
+  const nightly = SELLER && !META.liveUrl;
+  badge.append(document.createTextNode(SOURCE.loading? t('Reading the sheet…') : SOURCE.live? t('Live · read {t}',{t:timeStr(SOURCE.at)}) : nightly ? t('Updated nightly · {d}',{d:META.generated}) : t('Snapshot from {d}',{d:META.generated}))); m1.append(badge);
+  if(!nightly){ const rb=H('button','reset', SOURCE.loading?'…':t('Refresh')); rb.type='button'; rb.disabled=!!SOURCE.loading; rb.onclick=()=>refreshLive(true); m1.append(rb); }
   const m2=H('div'); if(SOURCE.error && !SOURCE.live) m2.append(H('span','warn',t('Live read failed: {e}. ',{e:t(SOURCE.error)})));
-  const a=H('a',null,t('Open the Google Sheet')); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener'; m2.append(a);
-  const g=H('a',null,t('User guide')); g.href='manual.html'; g.target='_blank'; g.rel='noopener'; m2.append(document.createTextNode(' · '), g);
+  if(!SELLER){ const a=H('a',null,t('Open the Google Sheet')); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener'; m2.append(a); }
+  const g=H('a',null,t('User guide')); g.href=SELLER?'../../manual.html':'manual.html'; if(SELLER) m2.append(document.createTextNode(t('Only your lines') + ' ')); g.target='_blank'; g.rel='noopener'; m2.append(document.createTextNode(SELLER?'· ':' · '), g);
   const lw=H('span','langs'); for(const l of ['en','es']){ const b=H('button','langbtn',l.toUpperCase()); b.type='button'; b.setAttribute('aria-pressed',String(LANG===l)); b.onclick=()=>{ if(LANG!==l) setLang(l); }; lw.append(b); } m2.append(document.createTextNode(' · '), lw); m.append(m1,m2);
 }
 let refreshing=false, lastLive=0;
@@ -660,12 +666,11 @@ async function refreshLive(){
     const res=await fetch(LIVE_URL,{cache:'no-store', signal:ctrl.signal}); clearTimeout(timer);
     if(!res.ok) throw new Error(t('Google answered HTTP {s}',{s:res.status}));
     const text=await res.text(); const {rows,diag}=cleanCSV(text); if(rows.length<10) throw new Error('the sheet came back nearly empty');
-    lastLive=Date.now(); setData(rows, diag, {live:true, at:new Date(), error:null, loading:false});
+    lastLive=Date.now(); setData(scope(rows), diag, {live:true, at:new Date(), error:null, loading:false});
   }catch(e){ const msg = e.name==='AbortError' ? 'timed out' : (e instanceof TypeError ? 'the browser blocked the request (offline, a strict sandbox, or the sheet is no longer shared)' : e.message); SOURCE={...SOURCE, loading:false, error:msg}; renderStatus(); }
   finally{ refreshing=false; }
 }
-setInterval(()=>refreshLive(), 10*60*1000);
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && Date.now()-lastLive>2*60*1000) refreshLive(); });
+if(!SELLER || META.liveUrl){ setInterval(()=>refreshLive(), 10*60*1000); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && Date.now()-lastLive>2*60*1000) refreshLive(); }); }
 
 let tableQ=''; let tableShown=40;
 function renderTable(cur){
@@ -675,8 +680,8 @@ function renderTable(cur){
   const tv=H('div','tv'); el.append(tv); const more=H('div','more'); el.append(more);
   const sorted=[...cur].sort((a,b)=> a.d===b.d ? (b.inv>a.inv?1:-1) : (a.d<b.d?1:-1));
   const draw=()=>{ const q=tableQ.trim().toLowerCase(); const rows=q? sorted.filter(r=>(r.prod+' '+r.inv+' '+r.ful+' '+r.pay+' '+r.type+' '+r.seller).toLowerCase().includes(q)) : sorted; sub.textContent=t('{n} lines · newest first · canceled orders excluded',{n:int(rows.length)});
-    tv.replaceChildren(); const tbl=H('table'); const th=H('tr'); [['Date'],['Invoice'],['Channel'],['Product']  ,['Type'],['Supplier'],['Seller'],['Qty','n'],['Net sales','n'],['Profit','n'],['Margin','n'],['Status']].forEach(([n,c])=>th.append(H('th',c,t(n)))); const thead=H('thead'); thead.append(th); tbl.append(thead);
-    const tb=H('tbody'); for(const r of rows.slice(0,tableShown)){ const tr=H('tr'); tr.append(H('td','dt',r.d)); tr.append(H('td',null,r.inv)); tr.append(H('td',null,r.ch)); tr.append(H('td','prod',r.prod||'—')); tr.append(H('td',null,r.type.toLowerCase().replace(/(^|\s|-)\S/g,s=>s.toUpperCase()))); tr.append(H('td',null,r.ful)); tr.append(H('td',null,r.seller||'—')); tr.append(H('td','n',int(r.qty))); tr.append(H('td','n',money(r.sales,true))); const pt=H('td','n',money(r.profit,true)); if(r.profit<0) pt.classList.add('neg'); tr.append(pt); tr.append(H('td','n',pct(r.sales?r.profit/r.sales:NaN))); const st=H('td'); if(r.sc==='rma') st.append(H('span','pill rma', r.paired?t('RMA · original'):(r.sales<0||r.qty<0?t('RMA · reversal'):'RMA'))); else if(r.sc==='return') st.append(H('span','pill ret',r.st.includes('REFUND')?t('REFUND'):t('RETURN'))); else st.textContent=t('Sold'); tr.append(st); tb.append(tr);} tbl.append(tb); tv.append(tbl);
+    tv.replaceChildren(); const tbl=H('table'); const th=H('tr'); ([['Date'],['Invoice'],['Channel'],['Product']  ,['Type'],['Supplier'],['Seller'],['Qty','n'],['Net sales','n'],['Profit','n'],['Margin','n'],['Status']].filter(([n])=>!(SELLER&&(n==='Profit'||n==='Margin'||n==='Supplier')))).forEach(([n,c])=>th.append(H('th',c,t(n)))); const thead=H('thead'); thead.append(th); tbl.append(thead);
+    const tb=H('tbody'); for(const r of rows.slice(0,tableShown)){ const tr=H('tr'); tr.append(H('td','dt',r.d)); tr.append(H('td',null,r.inv)); tr.append(H('td',null,r.ch)); tr.append(H('td','prod',r.prod||'—')); tr.append(H('td',null,r.type.toLowerCase().replace(/(^|\s|-)\S/g,s=>s.toUpperCase()))); if(!SELLER) tr.append(H('td',null,r.ful)); tr.append(H('td',null,r.seller||'—')); tr.append(H('td','n',int(r.qty))); tr.append(H('td','n',money(r.sales,true))); if(!SELLER){ const pt=H('td','n',money(r.profit,true)); if(r.profit<0) pt.classList.add('neg'); tr.append(pt); tr.append(H('td','n',pct(r.sales?r.profit/r.sales:NaN))); } const st=H('td'); if(r.sc==='rma') st.append(H('span','pill rma', r.paired?t('RMA · original'):(r.sales<0||r.qty<0?t('RMA · reversal'):'RMA'))); else if(r.sc==='return') st.append(H('span','pill ret',r.st.includes('REFUND')?t('REFUND'):t('RETURN'))); else st.textContent=t('Sold'); tr.append(st); tb.append(tr);} tbl.append(tb); tv.append(tbl);
     more.replaceChildren(); if(rows.length>tableShown){ const b=H('button',null,t('Show 40 more ({n} left)',{n:int(rows.length-tableShown)})); b.type='button'; b.onclick=()=>{ tableShown+=40; draw(); }; more.append(b);} };
   inp.addEventListener('input',()=>{ tableQ=inp.value; tableShown=40; draw(); });
   draw();
@@ -689,12 +694,13 @@ function renderNotes(){
   const a=H('a',null,t('the Google Sheet')); a.href=META.sheetUrl; a.target='_blank'; a.rel='noopener';
   n.append(sec(t('Where the numbers come from'),[ [document.createTextNode(t('Tab “{tab}” of ',{tab:META.tab})), a, document.createTextNode(t(', {n} invoice lines from {a} to {b}{src}.',{n:int(R.length),a:fmtDate(minDate),b:fmtDate(maxDate),src:SOURCE.live?t(', read live from the sheet'):t(', from the snapshot embedded in this page')}))], t('Net sales is the VENTA column (before tax). Gross profit is the PROFIT column, which already nets out cost, shipping, fees and return costs. Margin is profit divided by net sales.'), t('“Purchases by supplier” and “What we paid” sum the COSTO column (what the goods cost us), the SHIPPING column (freight we paid) and the FEE column (marketplace and payment fees). Orders count distinct invoice numbers. “Products sold” counts wheel, tire, package, accessory and custom-paint units. Labor (mount and balance is entered per wheel) and charge lines also carry quantities, so a plain sum of the QTY column on the sheet is higher; the “Labor & services” card shows those separately and the “Units sold by product” card reconciles the two. “Wheels & tires sold” counts wheel, tire and package units only. Return lines with negative quantities reduce the totals.'), t('Year-to-date comparisons use the same calendar window of the previous year, ending on the latest invoice date.') ]));
   n.append(sec(t('What was left out or repaired'),[ t('Since 2023 a returned order appears as its original line relabeled CANCELED plus an RMA line with negative amounts. Both legs are kept, so they net to zero and match a plain SUMIF on the sheet ({n} lines). A CANCELED line with nothing offsetting it (the 2021–2022 convention) is an order that never shipped and is excluded; those appear only in the cancellations panel. Rows marked TEST were dropped ({t} lines).',{n:int(ex['canceled paired with RMA (kept)']||0),t:int(ex['skip: TEST rows']||0)}), t('RMA, returned and refunded lines stay in sales, since their PROFIT already reflects the return; they are flagged in the invoice table.'), t('Month and year come from the MONTH and YEAR columns. {s} DATE cells had day and month swapped and were repaired; {u} unreadable dates were placed within their month.',{s:int(dt['date swapped']||0),u:int((dt['date mismatch']||0)+(dt['date missing']||0)+(dt['date clamped']||0))}), t('{e} empty pre-filled rows and {s} summary rows at the bottom of the tab were skipped.',{e:int(ex['skip: no MONTH (empty pre-filled rows)']||0),s:int(ex['skip: no YEAR (summary rows)']||0)}) ]));
+  if(SELLER) n.append(sec(t('What you see'),[ t('Only invoice lines whose SELLER column includes {s}. Shared invoices (for example MIGUEL/SERGIO) appear for both sellers.',{s:titleCase(SELLER)}), t('Cost, profit, margin and supplier purchases are not shown on this page.') ]));
   n.append(sec(t('Keeping it current'),[ t('The page reads the sheet directly every time it opens, every 10 minutes while it stays open, and when you press Refresh. New rows in the sheet show up on the next read.'), t('If the sheet cannot be reached, the page falls back to the snapshot embedded when it was last built (python3 build.py in the project folder).'), t('Filters are remembered in this browser only. Every chart has a Table view with the same numbers.') ]));
 }
 
 /* ---------- boot ---------- */
-{ const {rows,diag}=cleanCSV(SNAPSHOT_CSV); setData(rows, diag, {live:false, at:null, error:null, loading:false}); }
-refreshLive();
+{ const {rows,diag}=cleanCSV(SNAPSHOT_CSV); setData(scope(rows), diag, {live:false, at:null, error:null, loading:false}); }
+if(!SELLER || META.liveUrl) refreshLive();
 let raf=0; const ro=new ResizeObserver(()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ const w=vizWidth(cards.trend); if (Math.abs(w-W)>4) renderAll(); }); }); ro.observe(cards.trend);
 document.addEventListener('scroll',()=>{ hideTip(); document.querySelectorAll('.xh').forEach(l=>l.setAttribute('visibility','hidden')); },{passive:true});
 })();

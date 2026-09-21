@@ -27,6 +27,16 @@ the dashboard and linked from the header and the login page.
 small Google Apps Script relay so the sheet can be shared with nobody but the
 owners while the dashboard keeps reading it live.
 
+**Seller pages (optional):** `SELLERS_JSON` in `.env` lists sellers with their own
+password and relay token. `build.py` then writes `sellers/<name>/index.html`, an
+encrypted page that shows only that seller's lines and no cost, profit, margin or
+supplier data. Without the relay the seller pages refresh nightly (no live read),
+so a seller can never download the full sheet.
+
+**Configuration lives in one place:** the local `.env` file, mirrored as the
+GitHub Actions secret `DOTENV` (`gh secret set DOTENV < .env` after any change).
+The nightly workflow recreates `.env` from it before building.
+
 ## Refresh the fallback snapshot
 
     python3 build.py

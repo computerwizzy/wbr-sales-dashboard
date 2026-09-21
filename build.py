@@ -12,9 +12,11 @@ Usage:  python3 build.py            # download, render, encrypt
         python3 build.py --offline  # reuse the last downloaded sheet.csv
 
 Needs: python3 and the `cryptography` package (pip install cryptography).
-Config: .env (or environment) with SHEET_ID (or SHEET_URL), SHEET_GID, DASH_PASSWORD.
+Config: .env (or environment) with SHEET_ID (or SHEET_URL), SHEET_GID, DASH_PASSWORD,
+        optional LIVE_URL (Apps Script relay) and SELLERS_JSON ({"SERGIO":{"password":"...","token":"..."}, ...})
+        which produces sellers/<name>/index.html pages showing only that seller's lines.
 """
-import sys, os, re, json, base64, secrets, datetime as dt, urllib.request
+import sys, os, re, json, base64, secrets, datetime as dt, urllib.request, csv, io
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CSV = os.path.join(HERE, "sheet.csv")
@@ -36,7 +38,7 @@ def read_env():
                 if line and not line.startswith("#") and "=" in line:
                     k, v = line.split("=", 1)
                     env[k.strip()] = v.strip().strip('"').strip("'")
-    for k in ("SHEET_URL", "SHEET_ID", "SHEET_GID", "DASH_PASSWORD", "LIVE_URL"):
+    for k in ("SHEET_URL", "SHEET_ID", "SHEET_GID", "DASH_PASSWORD", "LIVE_URL", "SELLERS_JSON"):
         if os.environ.get(k): env[k] = os.environ[k]
     return env
 
@@ -63,14 +65,15 @@ def logo_data_uri():
     if not os.path.exists(LOGO): sys.exit(f"Missing {LOGO}")
     return "data:image/png;base64," + base64.b64encode(open(LOGO, "rb").read()).decode()
 
-def render_app(sid, gid, live_url=None):
+def render_app(sid, gid, live_url=None, seller=None, csv_text=None, out_path=APP_OUT):
     tpl = open(TEMPLATE, encoding="utf-8").read()
-    csv_text = open(CSV, encoding="utf-8").read()
+    if csv_text is None: csv_text = open(CSV, encoding="utf-8").read()
     meta = {
         "generated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "sheetId": sid, "gid": gid,
         "sheetUrl": f"https://docs.google.com/spreadsheets/d/{sid}/edit?gid={gid}",
         "liveUrl": live_url or "",
+        "seller": seller or "",
         "tab": TAB,
     }
     payload = "const SNAPSHOT_CSV = " + json.dumps(csv_text, ensure_ascii=False) + ";\nconst META = " + json.dumps(meta, ensure_ascii=False) + ";"
@@ -80,8 +83,9 @@ def render_app(sid, gid, live_url=None):
     html = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
             '<meta name="robots" content="noindex,nofollow">\n</head>\n<body>\n' + body + '\n</body>\n</html>\n')
-    open(APP_OUT, "w", encoding="utf-8").write(html)
-    print(f"Wrote app.html ({os.path.getsize(APP_OUT)/1024:.0f} KB) - unencrypted, keep it out of git")
+    if out_path:
+        open(out_path, "w", encoding="utf-8").write(html)
+        print(f"Wrote {os.path.basename(out_path)} ({len(html)/1024:.0f} KB) - unencrypted, keep it out of git")
     return html
 
 def encrypt(html, password):
@@ -97,12 +101,36 @@ def encrypt(html, password):
     b64 = lambda b: base64.b64encode(b).decode()
     return {"v": 1, "iter": PBKDF2_ITER, "salt": b64(salt), "iv": b64(iv), "data": b64(ct)}
 
-def render_login(enc):
+def render_login(enc, out=OUT, seller=None):
     shell = open(LOGIN, encoding="utf-8").read()
     if "__ENC_JSON__" not in shell: sys.exit("login.html has no __ENC_JSON__ placeholder")
-    html = shell.replace("__ENC_JSON__", json.dumps(enc)).replace("__LOGO__", logo_data_uri())
-    open(OUT, "w", encoding="utf-8").write(html)
-    print(f"Wrote index.html ({os.path.getsize(OUT)/1024:.0f} KB) - encrypted, safe to publish")
+    html = (shell.replace("__ENC_JSON__", json.dumps(enc)).replace("__LOGO__", logo_data_uri())
+                 .replace("__SELLER__", f" · {seller.title()}" if seller else "")
+                 .replace("__MANUAL__", "../../manual.html" if seller else "manual.html"))
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    open(out, "w", encoding="utf-8").write(html)
+    print(f"Wrote {os.path.relpath(out, HERE)} ({os.path.getsize(out)/1024:.0f} KB) - encrypted, safe to publish")
+
+def seller_csv(csv_text, seller):
+    """Keep the header plus the lines whose SELLER cell names this seller (shared MIGUEL/SERGIO lines count for both)."""
+    rows = list(csv.reader(io.StringIO(csv_text)))
+    hdr = [h.strip().upper() for h in rows[0]]
+    i = hdr.index("SELLER")
+    keep = [rows[0]] + [r for r in rows[1:] if i < len(r) and seller in [p.strip().upper().replace("JAMIE", "JAIME") for p in r[i].split("/")]]
+    buf = io.StringIO(); csv.writer(buf, lineterminator="\r\n").writerows(keep); return buf.getvalue()
+
+def build_sellers(sid, gid, live_url, sellers):
+    """One encrypted page per seller at sellers/<name>/index.html, each with its own password and only its own lines."""
+    full_csv = open(CSV, encoding="utf-8").read()
+    owner_key = None
+    if live_url:
+        m = re.search(r"[?&]key=([^&]+)", live_url); owner_key = m.group(1) if m else None
+    for name, cfg in sellers.items():
+        name = name.upper(); pw = cfg.get("password", ""); tok = cfg.get("token", "")
+        if len(pw) < 10: print(f"skip {name}: password too short"); continue
+        s_live = live_url.replace(owner_key, tok) if (live_url and owner_key and tok) else None
+        html = render_app(sid, gid, s_live, seller=name, csv_text=seller_csv(full_csv, name), out_path=None)
+        render_login(encrypt(html, pw), out=os.path.join(HERE, "sellers", name.lower(), "index.html"), seller=name)
 
 if __name__ == "__main__":
     env = read_env(); sid = sheet_id(env); gid = env.get("SHEET_GID")
@@ -113,3 +141,8 @@ if __name__ == "__main__":
     if "--offline" not in sys.argv or not os.path.exists(CSV): download(sid, gid, live_url)
     html = render_app(sid, gid, live_url)
     render_login(encrypt(html, password))
+    sellers = env.get("SELLERS_JSON")
+    if sellers:
+        try: sellers = json.loads(sellers)
+        except json.JSONDecodeError: sys.exit("SELLERS_JSON is not valid JSON")
+        build_sellers(sid, gid, live_url, sellers)
