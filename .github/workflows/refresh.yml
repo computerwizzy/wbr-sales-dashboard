@@ -24,6 +24,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html sellers
+          git add index.html
+          if [ -d sellers ]; then git add sellers; fi
           git diff --cached --quiet || git commit -m "Refresh fallback snapshot"
           git push

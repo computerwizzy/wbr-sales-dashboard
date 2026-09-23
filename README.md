@@ -27,7 +27,7 @@ the dashboard and linked from the header and the login page.
 small Google Apps Script relay so the sheet can be shared with nobody but the
 owners while the dashboard keeps reading it live.
 
-**Seller pages (optional):** `SELLERS_JSON` in `.env` lists sellers with their own
+**Seller pages (optional, currently off):** add `SELLERS_JSON` to `.env` listing sellers with their own
 password and relay token. `build.py` then writes `sellers/<name>/index.html`, an
 encrypted page that shows only that seller's lines and no cost, profit, margin or
 supplier data. Without the relay the seller pages refresh nightly (no live read),
