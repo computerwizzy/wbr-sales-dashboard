@@ -13,8 +13,9 @@ Usage:  python3 build.py            # download, render, encrypt
 
 Needs: python3 and the `cryptography` package (pip install cryptography).
 Config: .env (or environment) with SHEET_ID (or SHEET_URL), SHEET_GID, DASH_PASSWORD,
-        optional LIVE_URL (Apps Script relay) and SELLERS_JSON ({"SERGIO":{"password":"...","token":"..."}, ...})
-        which produces sellers/<name>/index.html pages showing only that seller's lines.
+        optional LIVE_URL (Apps Script relay), VIEWERS_JSON ({"MIGUEL":{"password":"...","token":"..."}, ...}) which adds
+        per-seller passwords to index.html that open only that seller's lines, and SELLERS_JSON (same shape) which
+        instead produces separate sellers/<name>/index.html pages.
 """
 import sys, os, re, json, base64, secrets, datetime as dt, urllib.request, csv, io
 
@@ -38,7 +39,7 @@ def read_env():
                 if line and not line.startswith("#") and "=" in line:
                     k, v = line.split("=", 1)
                     env[k.strip()] = v.strip().strip('"').strip("'")
-    for k in ("SHEET_URL", "SHEET_ID", "SHEET_GID", "DASH_PASSWORD", "LIVE_URL", "SELLERS_JSON"):
+    for k in ("SHEET_URL", "SHEET_ID", "SHEET_GID", "DASH_PASSWORD", "LIVE_URL", "SELLERS_JSON", "VIEWERS_JSON"):
         if os.environ.get(k): env[k] = os.environ[k]
     return env
 
@@ -88,18 +89,24 @@ def render_app(sid, gid, live_url=None, seller=None, csv_text=None, out_path=APP
         print(f"Wrote {os.path.basename(out_path)} ({len(html)/1024:.0f} KB) - unencrypted, keep it out of git")
     return html
 
-def encrypt(html, password):
+def encrypt(html, password, salt=None):
+    """AES-256-GCM with a PBKDF2 key. Payloads that share a salt can be tried with one derived key."""
     try:
         from cryptography.hazmat.primitives.ciphers.aead import AESGCM
         from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
         from cryptography.hazmat.primitives import hashes
     except ImportError:
         sys.exit("The `cryptography` package is required: pip install cryptography")
-    salt = secrets.token_bytes(16); iv = secrets.token_bytes(12)
+    salt = salt or secrets.token_bytes(16); iv = secrets.token_bytes(12)
     key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=PBKDF2_ITER).derive(password.encode("utf-8"))
     ct = AESGCM(key).encrypt(iv, html.encode("utf-8"), None)
     b64 = lambda b: base64.b64encode(b).decode()
-    return {"v": 1, "iter": PBKDF2_ITER, "salt": b64(salt), "iv": b64(iv), "data": b64(ct)}
+    return {"salt": salt, "iv": b64(iv), "data": b64(ct)}
+
+def bundle(payloads):
+    """Several encrypted payloads sharing one salt -> the JSON the login page expects."""
+    salt = payloads[0]["salt"]; assert all(p["salt"] == salt for p in payloads)
+    return {"v": 2, "iter": PBKDF2_ITER, "salt": base64.b64encode(salt).decode(), "payloads": [{"iv": p["iv"], "data": p["data"]} for p in payloads]}
 
 def render_login(enc, out=OUT, seller=None):
     shell = open(LOGIN, encoding="utf-8").read()
@@ -130,7 +137,7 @@ def build_sellers(sid, gid, live_url, sellers):
         if len(pw) < 10: print(f"skip {name}: password too short"); continue
         s_live = live_url.replace(owner_key, tok) if (live_url and owner_key and tok) else None
         html = render_app(sid, gid, s_live, seller=name, csv_text=seller_csv(full_csv, name), out_path=None)
-        render_login(encrypt(html, pw), out=os.path.join(HERE, "sellers", name.lower(), "index.html"), seller=name)
+        render_login(bundle([encrypt(html, pw)]), out=os.path.join(HERE, "sellers", name.lower(), "index.html"), seller=name)
 
 if __name__ == "__main__":
     env = read_env(); sid = sheet_id(env); gid = env.get("SHEET_GID")
@@ -140,7 +147,25 @@ if __name__ == "__main__":
     live_url = env.get("LIVE_URL") or None
     if "--offline" not in sys.argv or not os.path.exists(CSV): download(sid, gid, live_url)
     html = render_app(sid, gid, live_url)
-    render_login(encrypt(html, password))
+    salt = secrets.token_bytes(16)
+    payloads = [encrypt(html, password, salt)]                      # the owner's password opens everything
+    viewers = env.get("VIEWERS_JSON")                               # seller passwords open the same page, scoped to their lines
+    if viewers:
+        try: viewers = json.loads(viewers)
+        except json.JSONDecodeError: sys.exit("VIEWERS_JSON is not valid JSON")
+        full_csv = open(CSV, encoding="utf-8").read()
+        owner_key = None
+        if live_url:
+            m = re.search(r"[?&]key=([^&]+)", live_url); owner_key = m.group(1) if m else None
+        for name, cfg in viewers.items():
+            name = name.upper(); pw = cfg.get("password", ""); tok = cfg.get("token", "")
+            if len(pw) < 10: sys.exit(f"VIEWERS_JSON: password for {name} is too short")
+            if pw == password: sys.exit(f"VIEWERS_JSON: {name} must not use the owner's password")
+            s_live = live_url.replace(owner_key, tok) if (live_url and owner_key and tok) else None
+            s_html = render_app(sid, gid, s_live, seller=name, csv_text=seller_csv(full_csv, name), out_path=None)
+            payloads.append(encrypt(s_html, pw, salt))
+            print(f"  viewer {name}: {len(s_html)/1024:.0f} KB payload, own lines only")
+    render_login(bundle(payloads))
     sellers = env.get("SELLERS_JSON")
     if sellers:
         try: sellers = json.loads(sellers)

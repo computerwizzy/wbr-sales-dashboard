@@ -54,7 +54,7 @@ button.go:disabled{opacity:.7;cursor:progress}
   <p class="note"><span data-t="note">The dashboard is encrypted. It unlocks in your browser and nothing is sent anywhere.</span> <a href="__MANUAL__" data-t="guide">User guide</a></p>
 </main>
 <script>
-const ENC = __ENC_JSON__;
+const ENC = __ENC_JSON__;   // {iter, salt, payloads:[{iv, data}, ...]} — the password decides which payload opens
 (function(){
   const $=id=>document.getElementById(id);
   const TX={en:{title:'Sales dashboard',password:'Password',show:'Show',hide:'Hide',remember:'Remember this device',open:'Open dashboard',unlocking:'Unlocking…',note:'The dashboard is encrypted. It unlocks in your browser and nothing is sent anywhere.',guide:'User guide',wrong:'That password did not work. Check it and try again.',https:'This page must be opened over https (or localhost) to unlock.'},
@@ -65,7 +65,7 @@ const ENC = __ENC_JSON__;
   function applyLang(){ document.documentElement.lang=LANG; document.querySelectorAll('[data-t]').forEach(el=>{ const k=el.dataset.t; if(k==='show') el.textContent = pw.type==='password'?tx('show'):tx('hide'); else el.textContent=tx(k); }); document.querySelectorAll('.langbtn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG))); }
   document.querySelectorAll('.langbtn').forEach(b=>b.addEventListener('click',()=>{ LANG=b.dataset.lang; try{ localStorage.setItem('wbr-lang',LANG); }catch(e){} applyLang(); }));
   const b64=s=>Uint8Array.from(atob(s), c=>c.charCodeAt(0));
-  const salt=b64(ENC.salt), iv=b64(ENC.iv), data=b64(ENC.data);
+  const salt=b64(ENC.salt);
   const KEY='wbr-dash-key';
   applyLang();
   function fail(msg){ err.textContent=msg; err.hidden=false; go.disabled=false; go.textContent=tx('open'); }
@@ -73,7 +73,7 @@ const ENC = __ENC_JSON__;
   $('eye').addEventListener('click',()=>{ const t=pw.type==='password'; pw.type=t?'text':'password'; $('eye').textContent=t?tx('hide'):tx('show'); pw.focus(); });
   async function deriveKey(password){ const km=await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']); return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:ENC.iter, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, true, ['decrypt']); }
   const loaded = () => document.readyState==='loading' ? new Promise(r=>document.addEventListener('DOMContentLoaded', r, {once:true})) : Promise.resolve();
-  async function unlock(key){ const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, data); const html=new TextDecoder().decode(pt);
+  async function unlock(key){ let html=null; for(const p of ENC.payloads){ try{ html=new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(p.iv)}, key, b64(p.data))); break; }catch(e){} } if(html==null) throw new Error('no payload matched');
     await loaded(); // document.open() is ignored while the page is still parsing, which would append the dashboard under the login card
     document.open(); document.write(html); document.close(); }
   async function tryStored(){ let raw=null; try{ raw=sessionStorage.getItem(KEY)||localStorage.getItem(KEY); }catch(e){} if(!raw) return; try{ const key=await crypto.subtle.importKey('raw', b64(raw), {name:'AES-GCM'}, true, ['decrypt']); await unlock(key); }catch(e){ try{ sessionStorage.removeItem(KEY); localStorage.removeItem(KEY); }catch(_){} } }
